@@ -21,7 +21,7 @@ ZeppelinCI can
 
 
 ### Getting Started
-ZeppelinCI is about three item
+As follows, Zeppelin CI provide two types to `docker image` creation and `docker container` running.
 ```
 ]# make
 
