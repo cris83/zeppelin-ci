@@ -21,7 +21,7 @@ ZeppelinCI can
 
 
 ### Getting Started
-As follows, Zeppelin CI provide two types to `docker image` creation and `docker container` running.
+As follows, Zeppelin CI provide two command to `docker image` creation and `docker container` running.
 ```
 ]# make
 
@@ -41,6 +41,13 @@ As follows, Zeppelin CI provide two types to `docker image` creation and `docker
   examples) 
    *              all items in the build system will be ran.
    spark_*        all spark cluster will be builded or ran.
+```
+
+Supports currently items are :
+```
+ > spark_standalone
+ > spark_mesos
+ > spark_yarn
 ```
 
 If you want to build `Docker Images`, then :
