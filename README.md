@@ -17,11 +17,11 @@ ZeppelinCI can
 
 ### Structure
 ![alt tag](https://cloud.githubusercontent.com/assets/3348133/11333590/2b1d8506-9212-11e5-84a7-7e2a052d0bd3.png)
-* ZeppelinCI is using `Docker` to handle three or more jobs at the same time in parallel.
-
+* ZeppelinCI is using `Docker` to run one or more build jobs in parallel at the same time.
 
 ### Getting Started
 As follows, Zeppelin CI provide two command to `docker image` creation and `docker container` running.
+It also has three items for supporting an interpreter.
 ```
 ]# make
 
@@ -50,12 +50,12 @@ Supports currently items are :
  > spark_yarn
 ```
 
-If you want to build `Docker Images`, then :
+To make docker images:
 ```
 ]# make build type=[backend|zeppelin] item=[spark_standalone|spark_mesos|spark_yarn]
 ```
 
-If you want to run `Docker Container`, then :
+To run docker containers:
 ```
 ]# make run type=[backend|zeppelin] item=[spark_standalone|spark_mesos|spark_yarn] \
    REPO=[your repository-url] BRANCH=[your branch]
