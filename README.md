@@ -50,10 +50,11 @@ If you want to build `Docker Images`, then :
 
 If you want to run `Docker Container`, then :
 ```
-]# make run type=[backend|zeppelin] item=[spark_standalone|spark_mesos|spark_yarn] REPO=[your repository] BRANCH=[your branch]
+]# make run type=[backend|zeppelin] item=[spark_standalone|spark_mesos|spark_yarn] \
+   REPO=[your repository-url] BRANCH=[your branch]
 ```
 * REPO & BRANCH : this parameter write your repository and branch that requested the `PR`.
-* In Jenkins, Supports the environment variable
+* In Jenkins, Supports the environment variable about `REPO & BRANCH` of requested the `PR`.
 
 
 ### ScreenShots
