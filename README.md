@@ -16,7 +16,7 @@ ZeppelinCI can
 
 
 ### Structure
-![alt tag](https://cloud.githubusercontent.com/assets/3348133/11333590/2b1d8506-9212-11e5-84a7-7e2a052d0bd3.png)
+![alt tag](https://cloud.githubusercontent.com/assets/3348133/11337991/99530b3c-9234-11e5-89ba-118b0071bd84.png)
 
 
 ### ScreenShots
