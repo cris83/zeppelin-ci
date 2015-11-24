@@ -66,7 +66,7 @@ To run docker containers:
 
 ### ScreenShots
 * When created PR or push.
-![alt tag](https://cloud.githubusercontent.com/assets/8110426/11338319/bc717494-9236-11e5-876d-b219248c1f1f.png)
+![image](https://cloud.githubusercontent.com/assets/8110426/11338319/bc717494-9236-11e5-876d-b219248c1f1f.png)
 
 * When completed build.
-![alt tag](https://cloud.githubusercontent.com/assets/8110426/11338683/dccfcefa-9238-11e5-9477-387fbcf0e184.png)
+![image](https://cloud.githubusercontent.com/assets/8110426/11338683/dccfcefa-9238-11e5-9477-387fbcf0e184.png)
