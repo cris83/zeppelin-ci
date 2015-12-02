@@ -4,8 +4,8 @@
 IMAGE_VERSION = 0.3
 
 # Below env can be the arguments.
-SPARK_PROFILE = 1.4
-SPARK_VERSION = 1.4.0
+SPARK_PROFILE = "1.5 1.4 1.3 1.2 1.1"
+SPARK_VERSION = "1.5.0 1.4.1 1.3.1 1.2.1 1.1.1"
 HADOOP_PROFILE = 2.3
 HADOOP_VERSION = 2.3.0
 JDK_VERSION = 1.7.0
@@ -53,6 +53,7 @@ run_job =  \
 					echo "*****************************************************************"; \
 					echo "***** target path => $$t"; \
 					echo "*****************************************************************"; \
+					cp -f $(BUILD_DIR)/buildstep.sh $$t; \
 					make $2 -f Makefile \
 						type=`basename $$t` \
 						REPO=$(REPO) \
@@ -89,10 +90,10 @@ build :
 	echo "type=$(type)"; \
 	$(call setup); \
 	if [ "$(type)" = "backend" ]; then \
-		./build/repo/get_backend_utils.sh $(SPARK_VERSION) $(HADOOP_PROFILE); \
+		./build/repo/get_backend_utils.sh $(HADOOP_PROFILE); \
 		$(call run_job,$(INTERPRETER_BUILD_DIR),$@,$(item)) \
 	elif [ "$(type)" = "zeppelin" ]; then \
-		./build/repo/get_zeppelin_utils.sh $(SPARK_VERSION) $(HADOOP_PROFILE); \
+		./build/repo/get_zeppelin_utils.sh $(HADOOP_PROFILE); \
 		$(call run_job,$(ZEPPELIN_BUILD_DIR),$@,$(item)) \
 	else \
 		echo "no type you want!"; \

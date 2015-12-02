@@ -2,8 +2,8 @@ FROM DOCKER_VAR_OS
 MAINTAINER astroshim <hsshim@nflabs.com>
 
 # set env 
-ENV SPARK_PROFILE DOCKER_VAR_SPARK_PROFILE
-ENV SPARK_VERSION DOCKER_VAR_SPARK_VERSION
+ENV SPARK_PROFILE_ARRAY DOCKER_VAR_SPARK_PROFILE
+ENV SPARK_VERSION_ARRAY DOCKER_VAR_SPARK_VERSION
 ENV HADOOP_PROFILE DOCKER_VAR_HADOOP_PROFILE
 ENV HADOOP_VERSION DOCKER_VAR_HADOOP_VERSION
 
@@ -62,15 +62,27 @@ RUN ls -la /usr/local/hadoop/etc/hadoop/*-env.sh
 RUN chmod +x /usr/local/hadoop/etc/hadoop/*-env.sh
 RUN ls -la /usr/local/hadoop/etc/hadoop/*-env.sh
 
+# -----------------------------------------------------------------------------------
 # install spark
-COPY spark-$SPARK_VERSION-bin-hadoop$HADOOP_PROFILE.tgz /tmp/
-RUN tar xzf /tmp/spark-$SPARK_VERSION-bin-hadoop$HADOOP_PROFILE.tgz -C /usr/local 
+# -----------------------------------------------------------------------------------
+#COPY spark-$SPARK_VERSION-bin-hadoop$HADOOP_PROFILE.tgz /tmp/
+#RUN tar xzf /tmp/spark-$SPARK_VERSION-bin-hadoop$HADOOP_PROFILE.tgz -C /usr/local 
+#RUN cd /usr/local && ln -s spark-$SPARK_VERSION-bin-hadoop$HADOOP_PROFILE spark
+#ENV SPARK_HOME /usr/local/spark
+#ENV YARN_CONF_DIR $HADOOP_PREFIX/etc/hadoop
+#ENV PATH $PATH:$SPARK_HOME/bin:$HADOOP_PREFIX/bin
+# -----------------------------------------------------------------------------------
+ADD spark-*-bin-hadoop$HADOOP_PROFILE.tgz /usr/local/
+RUN for i in ${SPARK_VERSION_ARRAY[@]}; do \
+        ln -s /usr/local/spark-$i-bin-hadoop$HADOOP_PROFILE /usr/local/spark$i; \
+	done
+RUN ls -al /usr/local/
+# -----------------------------------------------------------------------------------
 
-RUN cd /usr/local && ln -s spark-$SPARK_VERSION-bin-hadoop$HADOOP_PROFILE spark
-ENV SPARK_HOME /usr/local/spark
-
-ENV YARN_CONF_DIR $HADOOP_PREFIX/etc/hadoop
-ENV PATH $PATH:$SPARK_HOME/bin:$HADOOP_PREFIX/bin
+# update buildstep
+COPY buildstep.sh /buildstep.sh
+RUN chown root.root /buildstep.sh
+RUN chmod 700 /buildstep.sh
 
 # update boot script
 COPY bootstrap.sh /etc/bootstrap.sh

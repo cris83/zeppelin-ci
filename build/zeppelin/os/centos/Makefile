@@ -22,7 +22,7 @@ docker_build =  \
 	sed -i -e 's/DOCKER_VAR_SPARK_VERSION/$(SPARK_VERSION)/g' $1/Dockerfile;  \
 	sed -i -e 's/DOCKER_VAR_HADOOP_PROFILE/$(HADOOP_PROFILE)/g' $1/Dockerfile;  \
 	sed -i -e 's/DOCKER_VAR_HADOOP_VERSION/$(HADOOP_VERSION)/g' $1/Dockerfile;  \
-	../../../repo/get_zeppelin_util_build.sh $(SPARK_VERSION) $(HADOOP_PROFILE); \
+	../../../repo/get_zeppelin_util_build.sh $(HADOOP_PROFILE); \
 	docker build -t zeppelin-"$1:$(IMAGE_VERSION)" $1/;
 
 help:
@@ -55,13 +55,14 @@ run :
 	if [ $(type) = "spark_standalone" ]; then\
 		echo "run spark standalone mode zeppelin! "; \
 		docker run --rm -i -e BRANCH=$(BRANCH) -e REPO=$(REPO) \
+		-v /tmp/buildstep:/buildstep \
 		-p $(ZEPPELIN_HOST_PORT_STANDALONE):$(ZEPPELIN_PORT) \
 		-p $(ZEPPELIN_HOST_WEBSOCKET_PORT_STANDALONE):$(ZEPPELIN_WEBSOCKET_PORT) \
-		--link $(type):sparkmaster \
 		zeppelin-$(type):$(IMAGE_VERSION) /bin/bash; \
 	elif [ $(type) = "spark_yarn" ]; then\
 		echo "run spark_yarn mode zeppelin! "; \
 		docker run --rm -i -e BRANCH=$(BRANCH) -e REPO=$(REPO) \
+		-v /tmp/buildstep:/buildstep \
 		-p $(ZEPPELIN_HOST_PORT_YARN):$(ZEPPELIN_PORT) \
 		-p $(ZEPPELIN_HOST_WEBSOCKET_PORT_YARN):$(ZEPPELIN_WEBSOCKET_PORT) \
 		--link $(type):sparkmaster \
@@ -69,6 +70,7 @@ run :
 	elif [ $(type) = "spark_mesos" ]; then\
 		echo "run mesos backend zeppelin! "; \
 		docker run --rm -i -e BRANCH=$(BRANCH) -e REPO=$(REPO) \
+		-v /tmp/buildstep:/buildstep \
 		-p $(ZEPPELIN_HOST_PORT_MESOS):$(ZEPPELIN_PORT) \
 		-p $(ZEPPELIN_HOST_WEBSOCKET_PORT_MESOS):$(ZEPPELIN_WEBSOCKET_PORT) \
 		--link spark_mesos:sparkmaster \

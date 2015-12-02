@@ -2,8 +2,8 @@ FROM DOCKER_VAR_OS
 MAINTAINER astroshim <hsshim@nflabs.com>
 
 # set env 
-ENV SPARK_PROFILE DOCKER_VAR_SPARK_PROFILE
-ENV SPARK_VERSION DOCKER_VAR_SPARK_VERSION
+ENV SPARK_PROFILE_ARRAY DOCKER_VAR_SPARK_PROFILE
+ENV SPARK_VERSION_ARRAY DOCKER_VAR_SPARK_VERSION
 ENV HADOOP_PROFILE DOCKER_VAR_HADOOP_PROFILE
 ENV HADOOP_VERSION DOCKER_VAR_HADOOP_VERSION
 ENV MAVEN_VERSION 3.3.3
@@ -37,10 +37,21 @@ COPY maven-settings.xml /usr/share/maven/conf/settings.xml
 # copy zeppelin config.
 COPY zeppelin-env.sh /tmp/
 
+# -----------------------------------------------------------------------------------
 # get spark
-COPY spark-$SPARK_VERSION-bin-hadoop$HADOOP_PROFILE.tgz /tmp/
-RUN tar xzf /tmp/spark-$SPARK_VERSION-bin-hadoop$HADOOP_PROFILE.tgz -C /usr/share \
-    && mv /usr/share/spark-$SPARK_VERSION-bin-hadoop$HADOOP_PROFILE /usr/share/spark
+# -----------------------------------------------------------------------------------
+#COPY spark-$SPARK_VERSION-bin-hadoop$HADOOP_PROFILE.tgz /tmp/
+#RUN tar xzf /tmp/spark-$SPARK_VERSION-bin-hadoop$HADOOP_PROFILE.tgz -C /usr/share \
+#    && mv /usr/share/spark-$SPARK_VERSION-bin-hadoop$HADOOP_PROFILE /usr/share/spark
+# -----------------------------------------------------------------------------------
+ADD spark-*-bin-hadoop$HADOOP_PROFILE.tgz /usr/local/
+#ENV SPARK_VERSION_ARRAY 1.5.0 1.4.1 1.3.1 1.2.1 1.1.1
+RUN for i in ${SPARK_VERSION_ARRAY[@]}; do \
+        echo "$i"; \
+        ln -s /usr/local/spark-$i-bin-hadoop$HADOOP_PROFILE /usr/local/spark$i; \
+    done
+RUN ls -al /usr/local/
+# -----------------------------------------------------------------------------------
 
 # Py4j for PySpark
 RUN easy_install py4j
@@ -60,6 +71,11 @@ RUN yum -y install ImageMagick
 COPY firefox-31.0.tar.bz2 /tmp/
 RUN tar xjf /tmp/firefox-31.0.tar.bz2 -C /
 RUN ln -s /firefox/firefox /usr/bin/firefox
+
+# update buildstep
+COPY buildstep.sh /buildstep.sh
+RUN chown root.root /buildstep.sh
+RUN chmod 700 /buildstep.sh
 
 # update boot script
 COPY build.sh /build.sh

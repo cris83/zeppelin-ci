@@ -35,7 +35,7 @@ docker_build =  \
 	sed -i -e 's/DOCKER_VAR_SPARK_VERSION/$(SPARK_VERSION)/g' $1/Dockerfile;  \
 	sed -i -e 's/DOCKER_VAR_HADOOP_PROFILE/$(HADOOP_PROFILE)/g' $1/Dockerfile;  \
 	sed -i -e 's/DOCKER_VAR_HADOOP_VERSION/$(HADOOP_VERSION)/g' $1/Dockerfile;  \
-	../repo/get_backend_util_build.sh $(SPARK_VERSION) $(HADOOP_PROFILE); \
+	../repo/get_backend_util_build.sh $(HADOOP_PROFILE); \
 	docker build -t "$1:$(IMAGE_VERSION)" $1/ 
 
 help:
@@ -66,15 +66,17 @@ run :
 	fi; \
 	if [ $(type) = "spark_standalone" ]; then\
 		docker run -id \
+		-v /tmp/buildstep:/buildstep \
 		-p 38080:$(ZEPPELIN_PORT) \
 		-p 37077:$(SPARK_MASTER_PORT) \
 		-p 38888:$(SPARK_MASTER_UI_PORT) \
 		-p 38081:$(ZEPPELIN_WEBSOCKET_PORT) \
-		-h sparkmaster \
 		--name $(type) \
+		-h sparkmaster \
 		$(type):$(IMAGE_VERSION) bash; \
 	elif [ $(type) = "spark_yarn" ]; then\
 		docker run -id \
+		-v /tmp/buildstep:/buildstep \
 		-p 18080:$(ZEPPELIN_PORT) \
 		-p 17077:$(SPARK_MASTER_PORT) \
 		-p 18888:$(SPARK_MASTER_UI_PORT) \
@@ -96,6 +98,7 @@ run :
 		$(type):$(IMAGE_VERSION) bash; \
 	elif [ $(type) = "spark_mesos" ]; then\
 		docker run -id \
+		-v /tmp/buildstep:/buildstep \
 		-p 28080:$(ZEPPELIN_PORT) \
 		-p 27077:$(SPARK_MASTER_PORT) \
 		-p 28888:$(SPARK_MASTER_UI_PORT) \
