@@ -1,17 +1,14 @@
 FROM DOCKER_VAR_OS
 MAINTAINER astroshim <hsshim@nflabs.com>
 
-# set env 
-ENV SPARK_PROFILE DOCKER_VAR_SPARK_PROFILE
-ENV SPARK_VERSION DOCKER_VAR_SPARK_VERSION
-ENV HADOOP_PROFILE DOCKER_VAR_HADOOP_PROFILE
-ENV HADOOP_VERSION DOCKER_VAR_HADOOP_VERSION
-
 # update the image with the latest packages
 RUN yum update -y; yum clean all
 RUN yum install -y \
 wget \
 tar \
+bzip2 \
+openssh-server \
+openssh-clients \
 curl \
 && \
 yum clean all
@@ -27,12 +24,10 @@ RUN rm jdk-linux-x64.rpm
 ENV JAVA_HOME /usr/java/default
 ENV PATH $PATH:$JAVA_HOME/bin
 
-# get spark
-COPY spark-$SPARK_VERSION-bin-hadoop$HADOOP_PROFILE.tgz /tmp/
-RUN tar xzf /tmp/spark-$SPARK_VERSION-bin-hadoop$HADOOP_PROFILE.tgz -C /usr/local
-
-RUN cd /usr/local && ln -s spark-$SPARK_VERSION-bin-hadoop$HADOOP_PROFILE spark
-ENV SPARK_HOME /usr/local/spark
+# update buildstep
+COPY buildstep.sh /buildstep.sh
+RUN chown root.root /buildstep.sh
+RUN chmod 700 /buildstep.sh
 
 # update boot script
 COPY bootstrap.sh /etc/bootstrap.sh

@@ -1,53 +1,140 @@
 #!/bin/bash
+set -e
+source /reposhare/$ZCI_ENV
 
-export SPARK_PROFILE 1.4
-export SPARK_VERSION 1.4.0
-export HADOOP_PROFILE 2.3
-export HADOOP_VERSION 2.3.0
+# ----------------------------------------------------------------------
+# Init
+# ----------------------------------------------------------------------
+BUILDSTEP_TIMEOUT=3600          #<- sec
+BUILDSTEP_DIR=/reposhare/buildstep/$BUILD_TYPE
+BUILDSTEP_ZEP=zeppelin.bs
+BUILDSTEP_BAK=backend.bs
+SPARK_SHARE=/reposhare/$BUILD_TYPE
 
-: ${HADOOP_PREFIX:=/usr/local/hadoop}
+/buildstep.sh init $BUILDSTEP_DIR $BUILDSTEP_TIMEOUT
+/buildstep.sh log $BUILDSTEP_BAK "# Start, backend build ..."
 
-$HADOOP_PREFIX/etc/hadoop/hadoop-env.sh
+if [ -f $BUILDSTEP_DIR/$BUILDSTEP_ZEP ]; then
+	mv $BUILDSTEP_DIR/$BUILDSTEP_ZEP $BUILDSTEP_DIR/.$BUILDSTEP_ZEP.bak
+fi
 
-rm /tmp/*.pid
 
-# installing libraries if any 
-cd $HADOOP_PREFIX/share/hadoop/common ; for cp in ${ACP//,/ }; do  echo == $cp; curl -LO $cp ; done; cd -
+# ----------------------------------------------------------------------
+# Setup spark & firefox
+# ----------------------------------------------------------------------
+# setup firefox
+/buildstep.sh log $BUILDSTEP_BAK "- $BUILDSTEP_BAK : setup firefox"
+FIREFOX_BIN=firefox-31.0.tar.bz2
+if [ ! -d /reposhare/$FIREFOX_BIN ]; then
+    tar xjf /reposhare/$FIREFOX_BIN -C /reposhare
+fi
 
-# setting spark defaults
-echo spark.yarn.jar hdfs:///spark/spark-assembly-$SPARK_VERSION-hadoop$HADOOP_VERSION.jar > $SPARK_HOME/conf/spark-defaults.conf
-cp $SPARK_HOME/conf/metrics.properties.template $SPARK_HOME/conf/metrics.properties
+# setup spark
+mkdir -p $SPARK_SHARE
+IFS=' ' read -r -a SPARK_BIN_ARR <<< "$SPARK_VERSION"
+for i in "${SPARK_BIN_ARR[@]}"
+do
+    SPARK_VER=$i
+    SPARK_DAT=spark-$SPARK_VER-bin-hadoop$HADOOP_PROFILE
+    SPARK_BIN=$SPARK_DAT.tgz
 
-# run spark 
+    # download
+    if [ ! -f /reposhare/$SPARK_BIN ]; then
+        /buildstep.sh log $BUILDSTEP_BAK "- $BUILDSTEP_BAK : Doesn't exist spark -> downloading : /reposhare/$SPARK_BIN"
+        tmp_path=/tmp/$BUILD_TYPE
+        mkdir -p $tmp_path
+        wget -P $tmp_path http://mirror.tcpdiag.net/apache/spark/spark-$SPARK_VER/$SPARK_BIN
+        mv $tmp_path/$SPARK_BIN /reposhare
+    fi
+
+    # setup
+    /buildstep.sh log $BUILDSTEP_BAK "- $BUILDSTEP_BAK : setup version $SPARK_VER";
+    if [ ! -d $SPARK_SHARE/$SPARK_DAT ]; then
+        tar xzf /reposhare/$SPARK_BIN -C $SPARK_SHARE
+    fi
+done
+
+export SPARK_MASTER_PORT=7077
 export SPARK_LOCAL_IP=`awk 'NR==1 {print $1}' /etc/hosts`
 sed '1d' /etc/hosts > /tmp/hosts
 cat /tmp/hosts > /etc/hosts
 rm /tmp/hosts
 echo "$SPARK_LOCAL_IP `hostname`" >> /etc/hosts
 
-# start hdfs
-service sshd start
-$HADOOP_PREFIX/sbin/start-dfs.sh
-$HADOOP_PREFIX/sbin/start-yarn.sh
+/buildstep.sh log $BUILDSTEP_BAK "- $BUILDSTEP_BAK : Setup Succeed"
 
-# 
-$HADOOP_PREFIX/bin/hdfs dfsadmin -safemode leave && $HADOOP_PREFIX/bin/hdfs dfs -put $SPARK_HOME-$SPARK_VERSION-bin-hadoop$HADOOP_PROFILE/lib /spark
 
-#export SPARK_MASTER_OPTS="-Dspark.driver.port=7001 -Dspark.fileserver.port=7002
-#  -Dspark.broadcast.port=7003 -Dspark.replClassServer.port=7004
-#  -Dspark.blockManager.port=7005 -Dspark.executor.port=7006
-#  -Dspark.ui.port=4040 -Dspark.broadcast.factory=org.apache.spark.broadcast.HttpBroadcastFactory"
-#export SPARK_WORKER_OPTS="-Dspark.driver.port=7001 -Dspark.fileserver.port=7002
-#  -Dspark.broadcast.port=7003 -Dspark.replClassServer.port=7004
-#  -Dspark.blockManager.port=7005 -Dspark.executor.port=7006
-#  -Dspark.ui.port=4040 -Dspark.broadcast.factory=org.apache.spark.broadcast.HttpBroadcastFactory"
+# ----------------------------------------------------------------------
+# Setup hadoop ( deafults )
+# ----------------------------------------------------------------------
+: ${HADOOP_PREFIX:=/usr/local/hadoop}
+$HADOOP_PREFIX/etc/hadoop/hadoop-env.sh
 
-export SPARK_MASTER_PORT=7077
+# installing libraries if any 
+cd $HADOOP_PREFIX/share/hadoop/common ; for cp in ${ACP//,/ }; do  echo == $cp; curl -LO $cp ; done; cd -
 
-cd /usr/local/spark-1.4.0-bin-hadoop2.3/sbin
-./start-master.sh -i $SPARK_LOCAL_IP
-./start-slave.sh spark://$SPARK_LOCAL_IP:$SPARK_MASTER_PORT
 
+# ----------------------------------------------------------------------
+# - Run spark 
+# - Desc : starting and stopping is executed with Buildstep.
+# ----------------------------------------------------------------------
+IFS=' ' read -r -a SPARK_VERSIONS <<< "$SPARK_VERSION"
+for i in "${SPARK_VERSIONS[@]}"
+do
+    # set spark env
+    SPARK_VER=$i
+
+    SPARK_DAT=spark-$SPARK_VER-bin-hadoop$HADOOP_PROFILE
+    export SPARK_HOME="$SPARK_SHARE/$SPARK_DAT"
+    cd $SPARK_HOME/sbin
+
+    ##### Build Step 1
+    /buildstep.sh waitfor $BUILDSTEP_ZEP "- $BUILDSTEP_ZEP : started $BUILD_TYPE build spark $SPARK_VER"
+    /buildstep.sh log $BUILDSTEP_BAK "- $BUILDSTEP_BAK : started $BUILD_TYPE backend spark $SPARK_VER"
+
+    # starting hadoop
+	echo spark.yarn.jar hdfs:///spark/spark-assembly-$SPARK_VER-hadoop$HADOOP_VERSION.jar > $SPARK_HOME/conf/spark-defaults.conf
+	cp $SPARK_HOME/conf/metrics.properties.template $SPARK_HOME/conf/metrics.properties
+
+	service sshd start
+	$HADOOP_PREFIX/sbin/start-dfs.sh
+	$HADOOP_PREFIX/sbin/start-yarn.sh
+	$HADOOP_PREFIX/bin/hdfs dfsadmin -safemode leave && $HADOOP_PREFIX/bin/hdfs dfs -put $SPARK_HOME-$SPARK_VER-bin-hadoop$HADOOP_PROFILE/lib /spark
+
+    # starting spark
+    ./start-master.sh -i $SPARK_LOCAL_IP
+
+    set +e
+    echo $SPARK_VER | grep "^1.[123].[0-9]" > /dev/null
+    let ret=$?
+
+    set -e
+    if [ $ret -eq 0 ]; then   # spark 1.3 or prior
+        ./start-slave.sh 1 `hostname`:$SPARK_MASTER_PORT
+    else
+        ./start-slave.sh spark://`hostname`:$SPARK_MASTER_PORT
+    fi
+
+    ##### Build Step 2
+    /buildstep.sh log $BUILDSTEP_BAK "- $BUILDSTEP_BAK : wait for zeppelin - $BUILD_TYPE $SPARK_VER"
+    /buildstep.sh waitfor $BUILDSTEP_ZEP "- $BUILDSTEP_ZEP : finished $BUILD_TYPE build spark $SPARK_VER"
+
+    # stopping
+    ./spark-daemon.sh stop org.apache.spark.deploy.worker.Worker 1
+    ./stop-master.sh
+
+    # stopping hadoop
+	$HADOOP_PREFIX/sbin/stop-dfs.sh
+	$HADOOP_PREFIX/sbin/stop-yarn.sh
+
+    ##### Build Step 3
+    /buildstep.sh log $BUILDSTEP_BAK "- $BUILDSTEP_BAK : closed $BUILD_TYPE backend spark $SPARK_VER"
+done
+
+
+# ----------------------------------------------------------------------
+# Tail
+# ----------------------------------------------------------------------
 CMD=${1:-"exit 0"}
 if [[ "$CMD" == "-d" ]];
 then
@@ -56,3 +143,8 @@ then
 else
 	/bin/bash -c "$*"
 fi
+
+
+# ----------------------------------------------------------------------
+# End of Script
+# ----------------------------------------------------------------------

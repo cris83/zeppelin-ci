@@ -1,20 +1,90 @@
 ### Makefile by astroshim <hsshim@nflabs.com>
 ### This is a makefile for making docker images or running docker containers.
 
-IMAGE_VERSION = 0.3
+.PHONY: help env build run clean
 
-# Below env can be the arguments.
-SPARK_PROFILE = 1.4
-SPARK_VERSION = 1.4.0
-HADOOP_PROFILE = 2.3
-HADOOP_VERSION = 2.3.0
-JDK_VERSION = 1.7.0
 
-.PHONY: help build run
+# -----------------------------------------------------------------------------
+# - Define Varialbes
+# -----------------------------------------------------------------------------
+
+BUILD_HOME=$(shell pwd)
+LOCALREPO_BIN=$(BUILD_HOME)/build/localrepo/bin
+LOCALREPO_DAT=$(BUILD_HOME)/build/localrepo/dat
+
+ZCI_ENV_FILE=.zci.env
+ZCI_ENV=$(BUILD_HOME)/$(ZCI_ENV_FILE)
+ZCI_YML=$(BUILD_HOME)/zci.yml
 
 BUILD_DIR=/tmp/build/build/
-INTERPRETER_BUILD_DIR=/tmp/build/build/backends
+REPOSHARE_DIR=/tmp/build/reposhare
 ZEPPELIN_BUILD_DIR=/tmp/build/build/zeppelin
+INTERPRETER_BUILD_DIR=/tmp/build/build/backends
+
+
+# -----------------------------------------------------------------------------
+# - Call Funtions
+# -----------------------------------------------------------------------------
+
+setup_comm = \
+	mkdir -p $(REPOSHARE_DIR); \
+	cp -f $(ZCI_ENV) $(REPOSHARE_DIR)
+
+setup_back = \
+	$(call setup_comm); \
+	mkdir -p $(INTERPRETER_BUILD_DIR); \
+	rm -rf $(INTERPRETER_BUILD_DIR)/$(item); \
+	cp -rf build/backends/$(item) $(INTERPRETER_BUILD_DIR); \
+	cp -f build/backends/Makefile $(INTERPRETER_BUILD_DIR)
+
+setup_zepp = \
+	$(call setup_comm); \
+	mkdir -p $(ZEPPELIN_BUILD_DIR)/os/centos; \
+	rm -rf $(ZEPPELIN_BUILD_DIR)/os/centos/$(item); \
+	cp -rf build/zeppelin/os/centos/$(item) $(ZEPPELIN_BUILD_DIR)/os/centos; \
+	cp -f build/zeppelin/os/centos/Makefile $(ZEPPELIN_BUILD_DIR)/os/centos; \
+	cp -f build/zeppelin/os/centos/build.sh $(ZEPPELIN_BUILD_DIR)/os/centos
+
+env_job = \
+	@source $(ZCI_ENV); \
+	echo "* Image Version  : $$IMAGE_VERSION";\
+	echo "* JDK Version    : $$JDK_VERSION";\
+	echo "* Hadoop Version : $$HADOOP_VERSION";\
+	echo "* Hadoop Profile : $$HADOOP_PROFILE";\
+	echo "* Spark Version  : $$SPARK_VERSION";\
+	echo "* Spark Profile  : $$SPARK_PROFILE";\
+
+run_job =  \
+	source $(ZCI_ENV); \
+	for dir in $$(find $(1) -type d); do \
+	  ( \
+		cd $$dir ; \
+		if [ -f Makefile ]; then \
+			for t in $$dir/*; do \
+			  (if [ -d $$t ]; then \
+				if [[ `basename $$t` == $(3) ]]; then \
+					cp -f $(BUILD_HOME)/build/buildstep.sh $$t; \
+					echo ""; echo -n -e "@ Target Path : $$t\n - "; \
+					make $2 -f Makefile \
+						type=`basename $$t` \
+						REPO=$(REPO) \
+						BRANCH=$(BRANCH) \
+						BUILD_HOME=$(BUILD_HOME) \
+						BUILD_PATH=$$t \
+						ZCI_ENV=$(ZCI_ENV_FILE) \
+						REPOSHARE_PATH=$(REPOSHARE_DIR); \
+					$(BUILD_HOME)/build/buildstep.sh putres $(item) $$?; \
+			  	fi; \
+			  fi; \
+			); done \
+		fi; \
+	/bin/echo " "; \
+	); done	
+
+
+# -----------------------------------------------------------------------------
+# - Build options
+# -----------------------------------------------------------------------------
 
 help:
 	@echo
@@ -23,61 +93,28 @@ help:
 	@echo "   make build     to build all docker image."
 	@echo "   make run       to run all docker container."
 	@echo 
-	@echo "   example) make build type=zeppelin item=spark_standalone "
+	@echo "   example) "
+	@echo "    ]# make build type=zeppelin item=spark_standalone "
 	@echo 
 	@echo "  type : "
 	@echo 
 	@echo "   backend        jobs for backends."
 	@echo "   zeppelin       jobs for zeppelin."
 	@echo 
-	@echo "  sub item : "
-	@echo "  examples) "
-	@echo "   *              all items in the build system will be ran."
-	@echo "   spark_*        all spark cluster will be builded or ran."
+	@echo "   sub item : "
+	@echo "   examples) "
+	@echo "    *              all items in the build system will be ran."
+	@echo "    spark_*        all spark cluster will be builded or ran."
+	@echo
+	@echo "    ]# make run type=backend item=spark_standalone"
+	@echo "    ]# make run type=zeppelin item=spark_standalone REPO=[your repository url] BRANCH=[your branch]"
 	@echo 
 
-setup =  \
-	mkdir -p $(BUILD_DIR); \
-	rm -rf $(BUILD_DIR)*; \
-	cp -rf build/* $(BUILD_DIR) 
+env :
+	@build/buildstep.sh envload $(ZCI_YML) $(ZCI_ENV)
+	$(call env_job)
 
-
-run_job =  \
-	for dir in $$(find $(1) -type d); do \
-	  ( \
-		cd $$dir ; \
-		if [ -f Makefile ]; then \
-			for t in $$dir/*; do \
-			  (if [ -d $$t ]; then \
-				if [[ `basename $$t` == $(3) ]]; then \
-					echo "*****************************************************************"; \
-					echo "***** target path => $$t"; \
-					echo "*****************************************************************"; \
-					make $2 -f Makefile \
-						type=`basename $$t` \
-						REPO=$(REPO) \
-						BRANCH=$(BRANCH) \
-						IMAGE_VERSION=$(IMAGE_VERSION) \
-						SPARK_PROFILE=$(SPARK_PROFILE) \
-						SPARK_VERSION=$(SPARK_VERSION) \
-						HADOOP_PROFILE=$(HADOOP_PROFILE) \
-						HADOOP_VERSION=$(HADOOP_VERSION) \
-						JDK_VERSION=$(JDK_VERSION) \
-						BUILD_PATH=$$t; \
-                    let RET=$$?; \
-                    if [ ! $$RET -eq 0 ]; then \
-                        echo "1" > /tmp/zepci_$(item)_result; \
-                    else \
-                        echo "0" > /tmp/zepci_$(item)_result; \
-                    fi; \
-			  	fi; \
-			  fi; \
-			); done \
-		fi; \
-	/bin/echo " "; \
-	); done	
-
-build : 
+build : env
 	@if [ -z $(type) ]; then \
 		echo "Type \"make help\" to run. please..";\
 		exit 1; \
@@ -86,31 +123,41 @@ build :
 		echo "Type \"make help\" to run. please..";\
 		exit 1; \
 	fi; \
-	echo "type=$(type)"; \
-	$(call setup); \
+	echo "* Build Type     : $(type)"; echo ""; \
+	\
+	$(LOCALREPO_BIN)/get_build_dat.sh $(ZCI_ENV) $(LOCALREPO_DAT); \
 	if [ "$(type)" = "backend" ]; then \
-		./build/repo/get_backend_utils.sh $(SPARK_VERSION) $(HADOOP_PROFILE); \
+		$(call setup_back); \
 		$(call run_job,$(INTERPRETER_BUILD_DIR),$@,$(item)) \
 	elif [ "$(type)" = "zeppelin" ]; then \
-		./build/repo/get_zeppelin_utils.sh $(SPARK_VERSION) $(HADOOP_PROFILE); \
+		$(call setup_zepp); \
 		$(call run_job,$(ZEPPELIN_BUILD_DIR),$@,$(item)) \
 	else \
 		echo "no type you want!"; \
 		exit 1; \
 	fi;
 
-run : 
+run : env
 	@if [ -z $(type) ]; then \
 		echo "Type \"make help\" to run. please..";\
 		exit 1; \
 	fi; \
-	$(call setup); \
+	\
 	if [ "$(type)" = "backend" ]; then \
+		$(call setup_back); \
 		$(call run_job,$(INTERPRETER_BUILD_DIR),$@,$(item)) \
 	elif [ "$(type)" = "zeppelin" ]; then \
+		$(call setup_zepp); \
 		$(call run_job,$(ZEPPELIN_BUILD_DIR),$@,$(item)) \
 	else \
 		echo "no type you want!"; \
 		exit 1; \
 	fi;
 
+clean :
+	@rm -rf $(REPOSHARE_DIR)
+
+
+# -----------------------------------------------------------------------------
+# - End of File
+# -----------------------------------------------------------------------------
