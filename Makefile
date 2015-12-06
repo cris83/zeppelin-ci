@@ -50,9 +50,7 @@ env_job = \
 	echo "* Image Version  : $$IMAGE_VERSION";\
 	echo "* JDK Version    : $$JDK_VERSION";\
 	echo "* Hadoop Version : $$HADOOP_VERSION";\
-	echo "* Hadoop Profile : $$HADOOP_PROFILE";\
 	echo "* Spark Version  : $$SPARK_VERSION";\
-	echo "* Spark Profile  : $$SPARK_PROFILE";\
 
 run_job =  \
 	source $(ZCI_ENV); \
