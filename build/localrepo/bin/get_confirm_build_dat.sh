@@ -12,7 +12,8 @@ IFS=' ' read -r -a SPARK_BIN_ARR <<< "$SPARK_VERSION"
 for i in "${SPARK_BIN_ARR[@]}"
 do
     SPARK_VER=$i
-    SPARK_BIN=spark-$SPARK_VER-bin-hadoop$HADOOP_PROFILE.tgz
+	HADOOP_PRO=${HADOOP_VERSION%.*}
+    SPARK_BIN=spark-$SPARK_VER-bin-hadoop$HADOOP_PRO.tgz
 
     # download
     if [ ! -f $REPO_HOME/$SPARK_BIN ]; then
