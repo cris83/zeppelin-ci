@@ -1,12 +1,6 @@
 FROM DOCKER_VAR_OS
 MAINTAINER astroshim <hsshim@nflabs.com>
 
-# set env 
-ENV SPARK_PROFILE_ARRAY DOCKER_VAR_SPARK_PROFILE
-ENV SPARK_VERSION_ARRAY DOCKER_VAR_SPARK_VERSION
-ENV HADOOP_PROFILE DOCKER_VAR_HADOOP_PROFILE
-ENV HADOOP_VERSION DOCKER_VAR_HADOOP_VERSION
-
 # Update the image with the latest packages
 RUN yum update -y; yum clean all
 RUN yum install -y \
@@ -15,6 +9,7 @@ tar \
 curl \
 which \
 sudo \
+bzip2 \
 openssh-server openssh-clients rsync \
 && \
 yum clean all
@@ -31,8 +26,11 @@ ENV JAVA_HOME /usr/java/default
 ENV PATH $PATH:$JAVA_HOME/bin
 
 # get hadoop 
-RUN curl -s https://archive.apache.org/dist/hadoop/core/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz | tar -xz -C /usr/local/
-RUN cd /usr/local && ln -s ./hadoop-$HADOOP_VERSION hadoop
+#RUN curl -s https://archive.apache.org/dist/hadoop/core/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz | tar -xz -C /usr/local/
+#RUN cd /usr/local && ln -s ./hadoop-$HADOOP_VERSION hadoop
+RUN mkdir -p /tmp/hadoop
+ADD hadoop.tar.gz /tmp/hadoop
+RUN ln -s /tmp/hadoop/hadoop* /usr/local/hadoop
 
 ENV HADOOP_PREFIX /usr/local/hadoop
 ENV HADOOP_COMMON_HOME /usr/local/hadoop
@@ -72,11 +70,11 @@ RUN ls -la /usr/local/hadoop/etc/hadoop/*-env.sh
 #ENV YARN_CONF_DIR $HADOOP_PREFIX/etc/hadoop
 #ENV PATH $PATH:$SPARK_HOME/bin:$HADOOP_PREFIX/bin
 # -----------------------------------------------------------------------------------
-ADD spark-*-bin-hadoop$HADOOP_PROFILE.tgz /usr/local/
-RUN for i in ${SPARK_VERSION_ARRAY[@]}; do \
-        ln -s /usr/local/spark-$i-bin-hadoop$HADOOP_PROFILE /usr/local/spark$i; \
-	done
-RUN ls -al /usr/local/
+#ADD spark-*-bin-hadoop$HADOOP_PROFILE.tgz /usr/local/
+#RUN for i in ${SPARK_VERSION_ARRAY[@]}; do \
+#        ln -s /usr/local/spark-$i-bin-hadoop$HADOOP_PROFILE /usr/local/spark$i; \
+#	done
+#RUN ls -al /usr/local/
 # -----------------------------------------------------------------------------------
 
 # update buildstep

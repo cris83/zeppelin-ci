@@ -1,18 +1,15 @@
 FROM DOCKER_VAR_OS
 MAINTAINER astroshim <hsshim@nflabs.com>
 
-# set env 
-ENV SPARK_PROFILE_ARRAY DOCKER_VAR_SPARK_PROFILE
-ENV SPARK_VERSION_ARRAY DOCKER_VAR_SPARK_VERSION
-ENV HADOOP_PROFILE DOCKER_VAR_HADOOP_PROFILE
-ENV HADOOP_VERSION DOCKER_VAR_HADOOP_VERSION
-
 # update the image with the latest packages
 RUN yum update -y; yum clean all
 RUN yum install -y \
 wget \
 tar \
 curl \
+bzip2 \
+openssh-server \
+openssh-clients \
 && \
 yum clean all
 
@@ -27,18 +24,8 @@ RUN rm jdk-linux-x64.rpm
 ENV JAVA_HOME /usr/java/default
 ENV PATH $PATH:$JAVA_HOME/bin
 
-# --- get spark ---------------------------------------------------------------------
-#COPY spark-$SPARK_VERSION-bin-hadoop$HADOOP_PROFILE.tgz /tmp/
-#RUN tar xzf /tmp/spark-$SPARK_VERSION-bin-hadoop$HADOOP_PROFILE.tgz -C /usr/local
-#RUN cd /usr/local && ln -s spark-$SPARK_VERSION-bin-hadoop$HADOOP_PROFILE spark
-#ENV SPARK_HOME /usr/local/spark
-# -----------------------------------------------------------------------------------
-ADD spark-*-bin-hadoop$HADOOP_PROFILE.tgz /usr/local/
-RUN for i in ${SPARK_VERSION_ARRAY[@]}; do \
-		ln -s /usr/local/spark-$i-bin-hadoop$HADOOP_PROFILE /usr/local/spark$i; \
-	done
-RUN ls -al /usr/local/
-# -----------------------------------------------------------------------------------
+# update reposhare
+RUN mkdir -p /reposhare
 
 # update buildstep
 COPY buildstep.sh /buildstep.sh
