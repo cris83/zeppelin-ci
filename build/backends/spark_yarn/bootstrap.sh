@@ -101,8 +101,6 @@ do
 	$HADOOP_PREFIX/sbin/start-yarn.sh
 	$HADOOP_PREFIX/bin/hdfs dfsadmin -safemode leave && $HADOOP_PREFIX/bin/hdfs dfs -put $SPARK_HOME-$SPARK_VER-bin-hadoop$HADOOP_PROFILE/lib /spark
 
-	# ----------------
-
     # starting spark
     ./start-master.sh -i $SPARK_LOCAL_IP
 

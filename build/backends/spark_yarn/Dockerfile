@@ -26,8 +26,6 @@ ENV JAVA_HOME /usr/java/default
 ENV PATH $PATH:$JAVA_HOME/bin
 
 # get hadoop 
-#RUN curl -s https://archive.apache.org/dist/hadoop/core/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz | tar -xz -C /usr/local/
-#RUN cd /usr/local && ln -s ./hadoop-$HADOOP_VERSION hadoop
 RUN mkdir -p /tmp/hadoop
 ADD hadoop.tar.gz /tmp/hadoop
 RUN ln -s /tmp/hadoop/hadoop* /usr/local/hadoop
@@ -59,23 +57,6 @@ RUN $HADOOP_PREFIX/bin/hdfs namenode -format
 RUN ls -la /usr/local/hadoop/etc/hadoop/*-env.sh
 RUN chmod +x /usr/local/hadoop/etc/hadoop/*-env.sh
 RUN ls -la /usr/local/hadoop/etc/hadoop/*-env.sh
-
-# -----------------------------------------------------------------------------------
-# install spark
-# -----------------------------------------------------------------------------------
-#COPY spark-$SPARK_VERSION-bin-hadoop$HADOOP_PROFILE.tgz /tmp/
-#RUN tar xzf /tmp/spark-$SPARK_VERSION-bin-hadoop$HADOOP_PROFILE.tgz -C /usr/local 
-#RUN cd /usr/local && ln -s spark-$SPARK_VERSION-bin-hadoop$HADOOP_PROFILE spark
-#ENV SPARK_HOME /usr/local/spark
-#ENV YARN_CONF_DIR $HADOOP_PREFIX/etc/hadoop
-#ENV PATH $PATH:$SPARK_HOME/bin:$HADOOP_PREFIX/bin
-# -----------------------------------------------------------------------------------
-#ADD spark-*-bin-hadoop$HADOOP_PROFILE.tgz /usr/local/
-#RUN for i in ${SPARK_VERSION_ARRAY[@]}; do \
-#        ln -s /usr/local/spark-$i-bin-hadoop$HADOOP_PROFILE /usr/local/spark$i; \
-#	done
-#RUN ls -al /usr/local/
-# -----------------------------------------------------------------------------------
 
 # update buildstep
 COPY buildstep.sh /buildstep.sh

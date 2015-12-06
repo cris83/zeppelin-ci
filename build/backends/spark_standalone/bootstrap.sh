@@ -73,12 +73,6 @@ for i in "${SPARK_VERSIONS[@]}"
 do
 	# set spark env
 	SPARK_VER=$i
-
-	#export SPARK_HOME="/usr/local/spark$SPARK_VER"
-	#cd /usr/local/spark$SPARK_VER/sbin
-	#export SPARK_HOME="/reposhare/spark/spark$SPARK_VER"
-	#export SPARK_HOME="$SPARK_SHARE/spark$SPARK_VER"
-
 	SPARK_DAT=spark-$SPARK_VER-bin-hadoop$HADOOP_PROFILE
 	export SPARK_HOME="$SPARK_SHARE/$SPARK_DAT"
 	cd $SPARK_HOME/sbin

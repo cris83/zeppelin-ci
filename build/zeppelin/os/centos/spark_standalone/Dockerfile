@@ -33,22 +33,6 @@ COPY maven-settings.xml /usr/share/maven/conf/settings.xml
 # copy zeppelin config.
 COPY zeppelin-env.sh /tmp/
 
-# -----------------------------------------------------------------------------------
-# get spark
-# -----------------------------------------------------------------------------------
-#COPY spark-$SPARK_VERSION-bin-hadoop$HADOOP_PROFILE.tgz /tmp/
-#RUN tar xzf /tmp/spark-$SPARK_VERSION-bin-hadoop$HADOOP_PROFILE.tgz -C /usr/share \
-#    && mv /usr/share/spark-$SPARK_VERSION-bin-hadoop$HADOOP_PROFILE /usr/share/spark
-# -----------------------------------------------------------------------------------
-##ADD spark-*-bin-hadoop$HADOOP_PROFILE.tgz /usr/local/
-#ENV SPARK_VERSION_ARRAY 1.5.0 1.4.1 1.3.1 1.2.1 1.1.1
-##RUN for i in ${SPARK_VERSION_ARRAY[@]}; do \
-##        echo "$i"; \
-##        ln -s /usr/local/spark-$i-bin-hadoop$HADOOP_PROFILE /usr/local/spark$i; \
-##    done
-##RUN ls -al /usr/local/
-# -----------------------------------------------------------------------------------
-
 # Py4j for PySpark
 RUN easy_install py4j
 
@@ -62,11 +46,6 @@ RUN yum -y install xorg-x11-fonts-100dpi
 RUN yum -y install xorg-x11-fonts-75dpi
 RUN yum -y install xorg-x11-apps
 RUN yum -y install ImageMagick
-
-# install firefox
-##COPY firefox-31.0.tar.bz2 /tmp/
-##RUN tar xjf /tmp/firefox-31.0.tar.bz2 -C /
-##RUN ln -s /firefox/firefox /usr/bin/firefox
 
 # update reposhare
 RUN mkdir -p /reposhare
