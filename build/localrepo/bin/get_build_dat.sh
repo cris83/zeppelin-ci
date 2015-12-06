@@ -12,7 +12,9 @@ echo "@ Download spark : $REPO_HOME"
 for i in "${SPARK_BIN_ARR[@]}"
 do
 	SPARK_VER=$i
-	SPARK_BIN=spark-$SPARK_VER-bin-hadoop$HADOOP_PROFILE.tgz
+	HADOOP_PRO=${HADOOP_VERSION%.*}
+	SPARK_DAT=spark-$SPARK_VER-bin-hadoop$HADOOP_PRO
+	SPARK_BIN=spark-$SPARK_VER-bin-hadoop$HADOOP_PRO.tgz
 
 	if [ ! -f $REPO_HOME/$SPARK_BIN ]; then
 		echo " - Doesn't exist -> Downloading spark : $REPO_HOME/$SPARK_BIN"
@@ -61,7 +63,7 @@ if [ $item = "spark_yarn" ]; then
     if [ ! -f $REPO_HOME/$HADOOP_BIN ]; then
         echo " - Doesn't exist -> Downloading hadoop : $REPO_HOME/$HADOOP_BIN"
         echo ""
-        wget -P $REPO_HOME https://archive.apache.org/dist/hadoop/core/hadoop-$HADOOP_VERSION/$H
+        wget -P $REPO_HOME https://archive.apache.org/dist/hadoop/core/hadoop-$HADOOP_VERSION/$HADOOP_BIN
     else
         echo " - Already exist : $HADOOP_BIN"
     fi
