@@ -13,7 +13,6 @@ for i in "${SPARK_BIN_ARR[@]}"
 do
 	SPARK_VER=$i
 	HADOOP_PRO=${HADOOP_VERSION%.*}
-	SPARK_DAT=spark-$SPARK_VER-bin-hadoop$HADOOP_PRO
 	SPARK_BIN=spark-$SPARK_VER-bin-hadoop$HADOOP_PRO.tgz
 
 	if [ ! -f $REPO_HOME/$SPARK_BIN ]; then
