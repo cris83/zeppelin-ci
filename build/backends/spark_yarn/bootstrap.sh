@@ -35,7 +35,8 @@ IFS=' ' read -r -a SPARK_BIN_ARR <<< "$SPARK_VERSION"
 for i in "${SPARK_BIN_ARR[@]}"
 do
     SPARK_VER=$i
-    SPARK_DAT=spark-$SPARK_VER-bin-hadoop$HADOOP_PROFILE
+	HADOOP_PRO=${HADOOP_VERSION%.*}
+	SPARK_DAT=spark-$SPARK_VER-bin-hadoop$HADOOP_PRO
     SPARK_BIN=$SPARK_DAT.tgz
 
     # download
@@ -83,8 +84,8 @@ for i in "${SPARK_VERSIONS[@]}"
 do
     # set spark env
     SPARK_VER=$i
-
-    SPARK_DAT=spark-$SPARK_VER-bin-hadoop$HADOOP_PROFILE
+	HADOOP_PRO=${HADOOP_VERSION%.*}
+	SPARK_DAT=spark-$SPARK_VER-bin-hadoop$HADOOP_PRO
     export SPARK_HOME="$SPARK_SHARE/$SPARK_DAT"
     cd $SPARK_HOME/sbin
 
@@ -99,7 +100,7 @@ do
 	service sshd start
 	$HADOOP_PREFIX/sbin/start-dfs.sh
 	$HADOOP_PREFIX/sbin/start-yarn.sh
-	$HADOOP_PREFIX/bin/hdfs dfsadmin -safemode leave && $HADOOP_PREFIX/bin/hdfs dfs -put $SPARK_HOME-$SPARK_VER-bin-hadoop$HADOOP_PROFILE/lib /spark
+	$HADOOP_PREFIX/bin/hdfs dfsadmin -safemode leave && $HADOOP_PREFIX/bin/hdfs dfs -put $SPARK_HOME-$SPARK_VER-bin-hadoop$HADOOP_PRO/lib /spark
 
     # starting spark
     ./start-master.sh -i $SPARK_LOCAL_IP

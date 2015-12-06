@@ -35,7 +35,8 @@ IFS=' ' read -r -a SPARK_BIN_ARR <<< "$SPARK_VERSION"
 for i in "${SPARK_BIN_ARR[@]}"
 do
     SPARK_VER=$i
-	SPARK_DAT=spark-$SPARK_VER-bin-hadoop$HADOOP_PROFILE
+	HADOOP_PRO=${HADOOP_VERSION%.*}
+	SPARK_DAT=spark-$SPARK_VER-bin-hadoop$HADOOP_PRO
 	SPARK_BIN=$SPARK_DAT.tgz
 
 	# download
@@ -73,7 +74,8 @@ for i in "${SPARK_VERSIONS[@]}"
 do
 	# set spark env
 	SPARK_VER=$i
-	SPARK_DAT=spark-$SPARK_VER-bin-hadoop$HADOOP_PROFILE
+	HADOOP_PRO=${HADOOP_VERSION%.*}
+	SPARK_DAT=spark-$SPARK_VER-bin-hadoop$HADOOP_PRO
 	export SPARK_HOME="$SPARK_SHARE/$SPARK_DAT"
 	cd $SPARK_HOME/sbin
 

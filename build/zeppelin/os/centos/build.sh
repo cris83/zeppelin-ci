@@ -91,20 +91,20 @@ cd /zeppelin
 arg_num=0
 IFS=' '
 read -r -a SPARK_VERSIONS <<< "$SPARK_VERSION"
-read -r -a SPARK_PROFILE <<< "$SPARK_PROFILE"
-
 for i in "${SPARK_VERSIONS[@]}"
 do
 	SPARK_VERSION=$i
+	SPARK_PROFILE=${SPARK_VERSION%.*}
+	HADOOP_PROFILE=${HADOOP_VERSION%.*}
 
 	##### Build Step 1
 	/buildstep.sh log $BUILDSTEP_ZEP "- $BUILDSTEP_ZEP : started $BUILD_TYPE build spark $SPARK_VERSION"
 
 	##### Build Step 2 ( build spark 1.x )
 	if [[ $arg_num == 0 ]]; then
-		first_build $SPARK_VERSION ${SPARK_PROFILE[$arg_num]} $HADOOP_PROFILE
+		first_build $SPARK_VERSION $SPARK_PROFILE $HADOOP_PROFILE
 	else
-		etc_build $SPARK_VERSION ${SPARK_PROFILE[$arg_num]} $HADOOP_PROFILE
+		etc_build $SPARK_VERSION $SPARK_PROFILE $HADOOP_PROFILE
 	fi
 	let "arg_num+=1"
 
