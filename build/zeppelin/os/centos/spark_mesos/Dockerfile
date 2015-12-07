@@ -2,10 +2,6 @@ FROM DOCKER_VAR_OS
 MAINTAINER astroshim <hsshim@nflabs.com>
 
 # set env 
-ENV SPARK_PROFILE DOCKER_VAR_SPARK_PROFILE
-ENV SPARK_VERSION DOCKER_VAR_SPARK_VERSION
-ENV HADOOP_PROFILE DOCKER_VAR_HADOOP_PROFILE
-ENV HADOOP_VERSION DOCKER_VAR_HADOOP_VERSION
 ENV MAVEN_VERSION 3.3.3
 
 # get utils.
@@ -27,9 +23,6 @@ ENV JAVA_HOME /etc/alternatives/jre_openjdk/
 ENV PATH $PATH:$JAVA_HOME/bin
 
 # install maven
-#RUN curl -sSL http://archive.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz | tar xzf - -C /usr/share \
-#  && mv /usr/share/apache-maven-$MAVEN_VERSION /usr/share/maven \
-#  && ln -s /usr/share/maven/bin/mvn /usr/bin/mvn
 COPY apache-maven-$MAVEN_VERSION-bin.tar.gz /tmp/
 RUN tar xzf /tmp/apache-maven-$MAVEN_VERSION-bin.tar.gz -C /usr/share \
   && mv /usr/share/apache-maven-$MAVEN_VERSION /usr/share/maven \
@@ -39,11 +32,6 @@ COPY maven-settings.xml /usr/share/maven/conf/settings.xml
 
 # copy zeppelin config.
 COPY zeppelin-env.sh /tmp/
-
-# get spark
-COPY spark-$SPARK_VERSION-bin-hadoop$HADOOP_PROFILE.tgz /tmp/
-RUN tar xzf /tmp/spark-$SPARK_VERSION-bin-hadoop$HADOOP_PROFILE.tgz -C /usr/share \
-	&& mv /usr/share/spark-$SPARK_VERSION-bin-hadoop$HADOOP_PROFILE /usr/share/spark
 
 # Py4j for PySpark
 RUN easy_install py4j
@@ -63,10 +51,13 @@ RUN yum -y install xorg-x11-fonts-75dpi
 RUN yum -y install xorg-x11-apps
 RUN yum -y install ImageMagick
 
-# install firefox
-COPY firefox-31.0.tar.bz2 /tmp/
-RUN tar xjf /tmp/firefox-31.0.tar.bz2 -C /
-RUN ln -s /firefox/firefox /usr/bin/firefox
+# update reposhare
+RUN mkdir -p /reposhare
+
+# update buildstep
+COPY buildstep.sh /buildstep.sh
+RUN chown root.root /buildstep.sh
+RUN chmod 700 /buildstep.sh
 
 # update boot script
 COPY build.sh /build.sh

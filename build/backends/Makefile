@@ -3,6 +3,20 @@
 
 .PHONY: help build run
 
+
+# ----------------------------------------------------------------------
+# - Define Varialbes 
+# ----------------------------------------------------------------------
+
+LOCALREPO_BIN=$(BUILD_HOME)/build/localrepo/bin
+LOCALREPO_DAT=$(BUILD_HOME)/build/localrepo/dat
+REPOSHARE_ENV=$(REPOSHARE_PATH)/$(ZCI_ENV)
+
+
+# ----------------------------------------------------------------------
+# - Host Port
+# ----------------------------------------------------------------------
+
 # zeppelin ports
 ZEPPELIN_PORT = 8080
 ZEPPELIN_WEBSOCKET_PORT = 8081
@@ -29,14 +43,21 @@ YARN_RM_RT_PORT = 8031
 YARN_RM_SCHEDULER_PORT = 8030
 YARN_RM_ADMIN_PORT = 8033
 
-docker_build =  \
-	sed -i -e 's/DOCKER_VAR_OS/centos:centos6/g' $1/Dockerfile;  \
-	sed -i -e 's/DOCKER_VAR_SPARK_PROFILE/$(SPARK_PROFILE)/g' $1/Dockerfile;  \
-	sed -i -e 's/DOCKER_VAR_SPARK_VERSION/$(SPARK_VERSION)/g' $1/Dockerfile;  \
-	sed -i -e 's/DOCKER_VAR_HADOOP_PROFILE/$(HADOOP_PROFILE)/g' $1/Dockerfile;  \
-	sed -i -e 's/DOCKER_VAR_HADOOP_VERSION/$(HADOOP_VERSION)/g' $1/Dockerfile;  \
-	../repo/get_backend_util_build.sh $(SPARK_VERSION) $(HADOOP_PROFILE); \
-	docker build -t "$1:$(IMAGE_VERSION)" $1/ 
+
+# ----------------------------------------------------------------------
+# - Call Function
+# ----------------------------------------------------------------------
+
+docker_build = \
+	@echo ""; \
+	$(LOCALREPO_BIN)/get_confirm_build_dat.sh $(REPOSHARE_ENV) $(LOCALREPO_DAT); \
+	sed -i -e 's/DOCKER_VAR_OS/centos:centos6/g' $1/Dockerfile; \
+	docker build -t "$1:$$IMAGE_VERSION" $1/
+
+
+# ----------------------------------------------------------------------
+# - Build Options
+# ----------------------------------------------------------------------
 
 help:
 	@echo
@@ -61,20 +82,29 @@ build :
 
 run : 
 	@if [ -z $(type) ]; then \
-		echo "Type \"make help\" to run. please..";\
+		echo "Type \"make help\" to run. please.."; \
 		exit 1; \
 	fi; \
-	if [ $(type) = "spark_standalone" ]; then\
+	\
+	$(LOCALREPO_BIN)/get_confirm_build_dat.sh $(REPOSHARE_ENV) $(LOCALREPO_DAT); \
+	\
+	if [ $(type) = "spark_standalone" ]; then \
 		docker run -id \
+		-v $(REPOSHARE_PATH):/reposhare \
+		-e BUILD_TYPE=$(type) \
+		-e ZCI_ENV=$(ZCI_ENV) \
 		-p 38080:$(ZEPPELIN_PORT) \
 		-p 37077:$(SPARK_MASTER_PORT) \
 		-p 38888:$(SPARK_MASTER_UI_PORT) \
 		-p 38081:$(ZEPPELIN_WEBSOCKET_PORT) \
-		-h sparkmaster \
 		--name $(type) \
+		-h sparkmaster \
 		$(type):$(IMAGE_VERSION) bash; \
-	elif [ $(type) = "spark_yarn" ]; then\
+	elif [ $(type) = "spark_yarn" ]; then \
 		docker run -id \
+		-v $(REPOSHARE_PATH):/reposhare \
+		-e BUILD_TYPE=$(type) \
+		-e ZCI_ENV=$(ZCI_ENV) \
 		-p 18080:$(ZEPPELIN_PORT) \
 		-p 17077:$(SPARK_MASTER_PORT) \
 		-p 18888:$(SPARK_MASTER_UI_PORT) \
@@ -96,6 +126,9 @@ run :
 		$(type):$(IMAGE_VERSION) bash; \
 	elif [ $(type) = "spark_mesos" ]; then\
 		docker run -id \
+		-v $(REPOSHARE_PATH):/reposhare \
+		-e BUILD_TYPE=$(type) \
+		-e ZCI_ENV=$(ZCI_ENV) \
 		-p 28080:$(ZEPPELIN_PORT) \
 		-p 27077:$(SPARK_MASTER_PORT) \
 		-p 28888:$(SPARK_MASTER_UI_PORT) \
@@ -105,6 +138,10 @@ run :
 		-h sparkmaster \
 		$(type):$(IMAGE_VERSION) bash; \
 	else \
-		echo "not found to run backend.";\
+		echo "not found to run backend."; \
 	fi
 
+
+# ----------------------------------------------------------------------
+# - End of File
+# ----------------------------------------------------------------------
