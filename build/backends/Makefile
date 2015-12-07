@@ -85,6 +85,9 @@ run :
 		echo "Type \"make help\" to run. please.."; \
 		exit 1; \
 	fi; \
+	\
+	$(LOCALREPO_BIN)/get_confirm_build_dat.sh $(REPOSHARE_ENV) $(LOCALREPO_DAT); \
+	\
 	if [ $(type) = "spark_standalone" ]; then \
 		docker run -id \
 		-v $(REPOSHARE_PATH):/reposhare \
