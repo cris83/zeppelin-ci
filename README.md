@@ -18,7 +18,7 @@ ZeppelinCI can
 ### Structure
 ![image](https://cloud.githubusercontent.com/assets/8110426/11679999/a07fef90-9e98-11e5-93a1-2ca8084e4040.png)
 * ZeppelinCI is using `Docker` to run one or more build jobs in parallel at the same time.
-* On container, ZeppelinCI-Buildstep controls the starting and stopping of Backends and Zeppelin for each version.
+* On container, `ZeppelinCI-Buildstep` controls the starting and stopping of Backends and Zeppelin for each version.
 
 ### Getting Started
 As follows, Zeppelin CI provide two command to `docker image` creation and `docker container` running.
