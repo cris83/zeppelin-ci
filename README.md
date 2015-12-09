@@ -16,7 +16,7 @@ ZeppelinCI can
 
 
 ### Structure
-![image](https://cloud.githubusercontent.com/assets/8110426/11357843/1f60503e-92af-11e5-8560-62c8d4d37489.png)
+![image](https://cloud.githubusercontent.com/assets/8110426/11679999/a07fef90-9e98-11e5-93a1-2ca8084e4040.png)
 * ZeppelinCI is using `Docker` to run one or more build jobs in parallel at the same time.
 
 ### Getting Started
