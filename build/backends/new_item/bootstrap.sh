@@ -66,9 +66,14 @@ echo "$SPARK_LOCAL_IP `hostname`" >> /etc/hosts
 /buildstep.sh log $BUILDSTEP_BAK "- $BUILDSTEP_BAK : Setup Succeed"
 
 
-##### starting mesos
-mesos-master --ip=0.0.0.0 --work_dir=/var/lib/mesos & > /dev/null
-mesos-slave --master=0.0.0.0:5050 --launcher=posix & > /dev/null
+# ----------------------------------------------------------------------
+# Starting or Setting new_item
+# ----------------------------------------------------------------------
+#
+# <- insert new item scripts.
+#
+# ----------------------------------------------------------------------
+
 
 # ----------------------------------------------------------------------
 # Run spark (start & stop)
@@ -83,12 +88,13 @@ do
     export SPARK_HOME="$SPARK_SHARE/$SPARK_DAT"
     cd $SPARK_HOME/sbin
 
-	cp $SPARK_HOME/conf/spark-env.sh.template $SPARK_HOME/conf/spark-env.sh
-	echo "export MESOS_NATIVE_JAVA_LIBRARY=/usr/lib/libmesos.so" >> $SPARK_HOME/conf/spark-env.sh
-
-	cp $SPARK_HOME/conf/spark-defaults.conf.template $SPARK_HOME/conf/spark-defaults.conf
-	echo "spark.master mesos://`hostname`:5050" >> $SPARK_HOME/conf/spark-defaults.conf
-	echo "spark.mesos.executor.home /usr/local/spark" >> $SPARK_HOME/conf/spark-defaults.conf
+	# --------------------------------------------------
+	# Setting SPARK_HOME for new_item
+	# --------------------------------------------------
+	#
+	# <- insert new item scripts.
+	#
+	# --------------------------------------------------
 
     ##### Build Step 1
     /buildstep.sh waitfor $BUILDSTEP_ZEP "- $BUILDSTEP_ZEP : started $BUILD_TYPE build spark $SPARK_VER"

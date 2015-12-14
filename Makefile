@@ -65,6 +65,7 @@ run_job =  \
 					echo ""; echo -n -e "@ Target Path : $$t\n - "; \
 					make $2 -f Makefile \
 						type=`basename $$t` \
+						name=$(name) \
 						REPO=$(REPO) \
 						BRANCH=$(BRANCH) \
 						BUILD_HOME=$(BUILD_HOME) \
@@ -92,6 +93,7 @@ help:
 	@echo "   make run       to run all docker container."
 	@echo 
 	@echo "   example) "
+	@echo "    ]# make build type=backend item=spark_standalone "
 	@echo "    ]# make build type=zeppelin item=spark_standalone "
 	@echo 
 	@echo "  type : "
@@ -104,8 +106,9 @@ help:
 	@echo "    *              all items in the build system will be ran."
 	@echo "    spark_*        all spark cluster will be builded or ran."
 	@echo
-	@echo "    ]# make run type=backend item=spark_standalone"
-	@echo "    ]# make run type=zeppelin item=spark_standalone REPO=[your repository url] BRANCH=[your branch]"
+	@echo "    ]# make run type=backend item=spark_standalone name=[Container Name]"
+	@echo "    ]# make run type=zeppelin item=spark_standalone name=[Backend Container Name]"
+	@echo "       REPO=[your repository url] BRANCH=[your branch]"
 	@echo 
 
 env :

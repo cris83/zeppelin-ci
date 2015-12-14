@@ -17,6 +17,9 @@ REPOSHARE_ENV=$(REPOSHARE_PATH)/$(ZCI_ENV)
 # - Host Port
 # ----------------------------------------------------------------------
 
+# get random host port
+GET_RND_PORT=`$(BUILD_HOME)/build/buildstep.sh getport`
+
 # zeppelin ports
 ZEPPELIN_PORT = 8080
 ZEPPELIN_WEBSOCKET_PORT = 8081
@@ -93,54 +96,88 @@ run :
 		-v $(REPOSHARE_PATH):/reposhare \
 		-e BUILD_TYPE=$(type) \
 		-e ZCI_ENV=$(ZCI_ENV) \
-		-p 38080:$(ZEPPELIN_PORT) \
-		-p 37077:$(SPARK_MASTER_PORT) \
-		-p 38888:$(SPARK_MASTER_UI_PORT) \
-		-p 38081:$(ZEPPELIN_WEBSOCKET_PORT) \
-		--name $(type) \
+		-e CONT_NAME=$(name) \
+		--name $(name) \
 		-h sparkmaster \
-		$(type):$(IMAGE_VERSION) bash; \
+		-p $(GET_RND_PORT):$(ZEPPELIN_PORT) \
+		-p $(GET_RND_PORT):$(SPARK_MASTER_PORT) \
+		-p $(GET_RND_PORT):$(SPARK_MASTER_UI_PORT) \
+		-p $(GET_RND_PORT):$(ZEPPELIN_WEBSOCKET_PORT) \
+		$(type):$(IMAGE_VERSION) /bin/bash; \
+		\
 	elif [ $(type) = "spark_yarn" ]; then \
 		docker run -id \
 		-v $(REPOSHARE_PATH):/reposhare \
 		-e BUILD_TYPE=$(type) \
 		-e ZCI_ENV=$(ZCI_ENV) \
-		-p 18080:$(ZEPPELIN_PORT) \
-		-p 17077:$(SPARK_MASTER_PORT) \
-		-p 18888:$(SPARK_MASTER_UI_PORT) \
-		-p 18081:$(ZEPPELIN_WEBSOCKET_PORT) \
-		-p 19000:$(HDFS_NN_COMMAND_PORT) \
-		-p 19001:$(YARN_JOB_TRACKER_PORT) \
-		-p 18088:$(YARN_RM_HTTP_PORT) \
-		-p 18042:$(YARN_NN_HTTP_PORT) \
-		-p 18030:$(YARN_RM_SCHEDULER_PORT) \
-		-p 18031:$(YARN_RM_RT_PORT) \
-		-p 18032:$(YARN_RM_PORT) \
-		-p 18033:$(YARN_RM_ADMIN_PORT) \
-		-p 50010:$(HDFS_DN_DATA_PORT) \
-		-p 50020:$(HDFS_DN_COMMAND_PORT) \
-		-p 50075:$(HDFS_DN_HTTP_PORT) \
-		-p 50070:$(HDFS_NN_HTTP_PORT) \
-		--name $(type) \
+		-e CONT_NAME=$(name) \
+		--name $(name) \
 		-h sparkmaster \
-		$(type):$(IMAGE_VERSION) bash; \
+		-p $(GET_RND_PORT):$(ZEPPELIN_PORT) \
+		-p $(GET_RND_PORT):$(SPARK_MASTER_PORT) \
+		-p $(GET_RND_PORT):$(SPARK_MASTER_UI_PORT) \
+		-p $(GET_RND_PORT):$(ZEPPELIN_WEBSOCKET_PORT) \
+		-p $(GET_RND_PORT):$(HDFS_NN_COMMAND_PORT) \
+		-p $(GET_RND_PORT):$(YARN_JOB_TRACKER_PORT) \
+		-p $(GET_RND_PORT):$(YARN_RM_HTTP_PORT) \
+		-p $(GET_RND_PORT):$(YARN_NN_HTTP_PORT) \
+		-p $(GET_RND_PORT):$(YARN_RM_SCHEDULER_PORT) \
+		-p $(GET_RND_PORT):$(YARN_RM_RT_PORT) \
+		-p $(GET_RND_PORT):$(YARN_RM_PORT) \
+		-p $(GET_RND_PORT):$(YARN_RM_ADMIN_PORT) \
+		-p $(GET_RND_PORT):$(HDFS_DN_DATA_PORT) \
+		-p $(GET_RND_PORT):$(HDFS_DN_COMMAND_PORT) \
+		-p $(GET_RND_PORT):$(HDFS_DN_HTTP_PORT) \
+		-p $(GET_RND_PORT):$(HDFS_NN_HTTP_PORT) \
+		$(type):$(IMAGE_VERSION) /bin/bash; \
+		\
 	elif [ $(type) = "spark_mesos" ]; then\
 		docker run -id \
 		-v $(REPOSHARE_PATH):/reposhare \
 		-e BUILD_TYPE=$(type) \
 		-e ZCI_ENV=$(ZCI_ENV) \
-		-p 28080:$(ZEPPELIN_PORT) \
-		-p 27077:$(SPARK_MASTER_PORT) \
-		-p 28888:$(SPARK_MASTER_UI_PORT) \
-		-p 28081:$(ZEPPELIN_WEBSOCKET_PORT) \
-		-p 25050:$(MESOS_PORT) \
-		--name $(type) \
+		-e CONT_NAME=$(name) \
+		--name $(name) \
 		-h sparkmaster \
-		$(type):$(IMAGE_VERSION) bash; \
-	else \
+		-p $(GET_RND_PORT):$(ZEPPELIN_PORT) \
+		-p $(GET_RND_PORT):$(SPARK_MASTER_PORT) \
+		-p $(GET_RND_PORT):$(SPARK_MASTER_UI_PORT) \
+		-p $(GET_RND_PORT):$(ZEPPELIN_WEBSOCKET_PORT) \
+		-p $(GET_RND_PORT):$(MESOS_PORT) \
+		$(type):$(IMAGE_VERSION) /bin/bash; \
+		\
+	elif [ $(type) = "new_item" ]; then\
+		\
+		echo "Please set here backend new_item."; \
+		\
+	else\
 		echo "not found to run backend."; \
 	fi
 
+	# ----------------------------------------------------
+	# - New_item Adding Guide
+	# ----------------------------------------------------
+	# * Common :
+	#
+	#	docker run -id \
+	#	-v $(REPOSHARE_PATH):/reposhare \
+	#	-e BUILD_TYPE=$(type) \
+	#	-e ZCI_ENV=$(ZCI_ENV) \
+	#	-e CONT_NAME=$(name) \
+	#	--name $(name) \
+	#	-h sparkmaster \
+	#	-p $(GET_RND_PORT):$(ZEPPELIN_PORT) \
+	#	-p $(GET_RND_PORT):$(ZEPPELIN_WEBSOCKET_PORT) \
+	#   ...
+	#	$(type):$(IMAGE_VERSION) /bin/bash; \
+	#
+	# ----------------------------------------------------
+	# * Do it yourself setting new_item : Ports
+	#
+	#	-p $(GET_RND_PORT):$(NEW_ITEM_PORT) \
+	#	-p $(GET_RND_PORT):$(...) \
+	#
+	# ----------------------------------------------------
 
 # ----------------------------------------------------------------------
 # - End of File

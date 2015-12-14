@@ -57,9 +57,8 @@ function etc_build
 # ----------------------------------------------------------------------
 BUILDSTEP_TIMEOUT=300
 BUILDSTEP_DIR=/reposhare/buildstep/$BUILD_TYPE
-BUILDSTEP_ZEP=zeppelin.bs
-BUILDSTEP_BAK=backend.bs
-
+BUILDSTEP_ZEP=${CONT_NAME}_zeppelin.bs
+BUILDSTEP_BAK=${CONT_NAME}_backend.bs
 
 /buildstep.sh init $BUILDSTEP_DIR $BUILDSTEP_TIMEOUT
 /buildstep.sh log $BUILDSTEP_ZEP "# Start, zeppelin build ..."
