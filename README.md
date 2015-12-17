@@ -309,4 +309,3 @@ cp -f $REPO_HOME/$HADOOP_BIN $BUILD_PATH/hadoop.tar.gz
 
 ### 4. Precautions
 - The [new item] name of the 'backends' and 'zeppelin' have to be the same.
-- 
