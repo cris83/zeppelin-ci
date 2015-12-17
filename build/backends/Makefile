@@ -55,7 +55,7 @@ docker_build = \
 	@echo ""; \
 	$(LOCALREPO_BIN)/get_confirm_build_dat.sh $(REPOSHARE_ENV) $(LOCALREPO_DAT); \
 	sed -i -e 's/DOCKER_VAR_OS/centos:centos6/g' $1/Dockerfile; \
-	docker build -t "$1:$$IMAGE_VERSION" $1/
+	docker build --pull=false -t "$1:$$IMAGE_VERSION" $1/
 
 
 # ----------------------------------------------------------------------
@@ -154,30 +154,30 @@ run :
 		echo "not found to run backend."; \
 	fi
 
-	# ----------------------------------------------------
-	# - New_item Adding Guide
-	# ----------------------------------------------------
-	# * Common :
-	#
-	#	docker run -id \
-	#	-v $(REPOSHARE_PATH):/reposhare \
-	#	-e BUILD_TYPE=$(type) \
-	#	-e ZCI_ENV=$(ZCI_ENV) \
-	#	-e CONT_NAME=$(name) \
-	#	--name $(name) \
-	#	-h sparkmaster \
-	#	-p $(GET_RND_PORT):$(ZEPPELIN_PORT) \
-	#	-p $(GET_RND_PORT):$(ZEPPELIN_WEBSOCKET_PORT) \
-	#   ...
-	#	$(type):$(IMAGE_VERSION) /bin/bash; \
-	#
-	# ----------------------------------------------------
-	# * Do it yourself setting new_item : Ports
-	#
-	#	-p $(GET_RND_PORT):$(NEW_ITEM_PORT) \
-	#	-p $(GET_RND_PORT):$(...) \
-	#
-	# ----------------------------------------------------
+# ----------------------------------------------------
+# - New_item Adding Guide
+# ----------------------------------------------------
+# * Common :
+#
+#	docker run -id \
+#	-v $(REPOSHARE_PATH):/reposhare \
+#	-e BUILD_TYPE=$(type) \
+#	-e ZCI_ENV=$(ZCI_ENV) \
+#	-e CONT_NAME=$(name) \
+#	--name $(name) \
+#	-h sparkmaster \
+#	-p $(GET_RND_PORT):$(ZEPPELIN_PORT) \
+#	-p $(GET_RND_PORT):$(ZEPPELIN_WEBSOCKET_PORT) \
+#   ...
+#	$(type):$(IMAGE_VERSION) /bin/bash; \
+#
+# ----------------------------------------------------
+# * Do it yourself setting new_item : Ports
+#
+#	-p $(GET_RND_PORT):$(NEW_ITEM_PORT) \
+#	-p $(GET_RND_PORT):$(...) \
+#
+# ----------------------------------------------------
 
 # ----------------------------------------------------------------------
 # - End of File

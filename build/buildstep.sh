@@ -13,7 +13,6 @@ function buildstep_init
     touch $BS_PROFILE
     echo "export BS_PATH=$bs_logdir" > $BS_PROFILE
     echo "export BS_TIMEOUT=$bs_timeout" >> $BS_PROFILE
-    echo "0" > $bs_logdir/$BS_INITFLG
 }
 
 
@@ -60,7 +59,7 @@ function buildstep_getargs()
 }
 
 
-function buildstep_log
+function buildstep_log_old
 {
     bs_file=$2
     bs_log=$(buildstep_getargs $@)
@@ -74,6 +73,16 @@ function buildstep_log
     else
         echo $bs_log >> $BS_LOGPATH/$bs_file
     fi
+}
+
+
+function buildstep_log
+{
+    bs_file=$2
+    bs_log=$(buildstep_getargs $@)
+
+    echo $bs_log
+	echo $bs_log >> $BS_LOGPATH/$bs_file
 }
 
 
@@ -112,22 +121,29 @@ function buildstep_waitfor
 
 		if [[ $BS_TIMEOUT == $timeout ]]; then
 			echo "# Build step - timeout !"
+			echo "# Build step - timeout !" >> $buildstep
 			exit 1
 		fi
 	done
 }
 
+
 function buildstep_putres
 {
-	item=$2
-	ret=$3
+	path=$2
+	container=$3
+	ret=$4
+
+	result="${path}/result"
+	mkdir -p $result
 
 	if [[ $ret != 0 ]]; then
-		echo "1" > /tmp/zepci_${item}_result
+		echo "1" > ${result}/${container}.res
 	else
-		echo "0" > /tmp/zepci_${item}_result
+		echo "0" > ${result}/${container}.res
 	fi
 }
+
 
 function buildstep_getport
 {
@@ -137,11 +153,15 @@ function buildstep_getport
 		port=`head -100 /dev/urandom | cksum | cut -f1 -d " " | awk '{print $1%55000+10000}'`
 		res=`nc -z -v localhost $port 2>&1 | grep succ | wc -l`
 		if [[ $res == 0 ]]; then
-			echo $port
-			break
+			res=`netstat -na | grep TIME_WAIT | grep $port | wc -l`
+			if [[ $res == 0 ]]; then
+				echo $port
+				break
+			fi
 		fi
 	done
 }
+
 
 function buildstep
 {

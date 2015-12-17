@@ -16,9 +16,16 @@ do
 	SPARK_BIN=spark-$SPARK_VER-bin-hadoop$HADOOP_PRO.tgz
 
 	if [ ! -f $REPO_HOME/$SPARK_BIN ]; then
+		set +e
 		echo " - Doesn't exist -> Downloading spark : $REPO_HOME/$SPARK_BIN"
 		echo ""
 		wget -P $REPO_HOME http://mirror.tcpdiag.net/apache/spark/spark-$SPARK_VER/$SPARK_BIN
+
+		set -e
+		if [ ! -f $REPO_HOME/$SPARK_BIN ]; then
+			echo " - Retry Downloading..."
+			wget -P $REPO_HOME http://apache.mirror.cdnetworks.com/spark/spark-$SPARK_VER/$SPARK_BIN
+		fi
 	else
 		echo " - Already exist : $SPARK_BIN"
 	fi

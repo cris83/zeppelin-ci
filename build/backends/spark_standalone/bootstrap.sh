@@ -5,7 +5,7 @@ source /reposhare/$ZCI_ENV
 # ----------------------------------------------------------------------
 # Init
 # ----------------------------------------------------------------------
-BUILDSTEP_TIMEOUT=3600			#<- sec
+BUILDSTEP_TIMEOUT=10800          #<- sec ( 3h )
 BUILDSTEP_DIR=/reposhare/buildstep/$BUILD_TYPE
 BUILDSTEP_ZEP=${CONT_NAME}_zeppelin.bs
 BUILDSTEP_BAK=${CONT_NAME}_backend.bs
