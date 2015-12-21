@@ -11,6 +11,7 @@
 LOCALREPO_BIN=$(BUILD_HOME)/build/localrepo/bin
 LOCALREPO_DAT=$(BUILD_HOME)/build/localrepo/dat
 REPOSHARE_ENV=$(REPOSHARE_PATH)/$(ZCI_ENV)
+CONT_NAME=$(type)_$(name)
 
 
 # ----------------------------------------------------------------------
@@ -96,8 +97,8 @@ run :
 		-v $(REPOSHARE_PATH):/reposhare \
 		-e BUILD_TYPE=$(type) \
 		-e ZCI_ENV=$(ZCI_ENV) \
-		-e CONT_NAME=$(name) \
-		--name $(name) \
+		-e CONT_NAME=$(CONT_NAME) \
+		--name $(CONT_NAME) \
 		-h sparkmaster \
 		-p $(GET_RND_PORT):$(ZEPPELIN_PORT) \
 		-p $(GET_RND_PORT):$(SPARK_MASTER_PORT) \
@@ -110,8 +111,8 @@ run :
 		-v $(REPOSHARE_PATH):/reposhare \
 		-e BUILD_TYPE=$(type) \
 		-e ZCI_ENV=$(ZCI_ENV) \
-		-e CONT_NAME=$(name) \
-		--name $(name) \
+		-e CONT_NAME=$(CONT_NAME) \
+		--name $(CONT_NAME) \
 		-h sparkmaster \
 		-p $(GET_RND_PORT):$(ZEPPELIN_PORT) \
 		-p $(GET_RND_PORT):$(SPARK_MASTER_PORT) \
@@ -136,8 +137,8 @@ run :
 		-v $(REPOSHARE_PATH):/reposhare \
 		-e BUILD_TYPE=$(type) \
 		-e ZCI_ENV=$(ZCI_ENV) \
-		-e CONT_NAME=$(name) \
-		--name $(name) \
+		-e CONT_NAME=$(CONT_NAME) \
+		--name $(CONT_NAME) \
 		-h sparkmaster \
 		-p $(GET_RND_PORT):$(ZEPPELIN_PORT) \
 		-p $(GET_RND_PORT):$(SPARK_MASTER_PORT) \
@@ -163,8 +164,8 @@ run :
 #	-v $(REPOSHARE_PATH):/reposhare \
 #	-e BUILD_TYPE=$(type) \
 #	-e ZCI_ENV=$(ZCI_ENV) \
-#	-e CONT_NAME=$(name) \
-#	--name $(name) \
+#	-e CONT_NAME=$(CONT_NAME) \
+#	--name $(CONT_NAME) \
 #	-h sparkmaster \
 #	-p $(GET_RND_PORT):$(ZEPPELIN_PORT) \
 #	-p $(GET_RND_PORT):$(ZEPPELIN_WEBSOCKET_PORT) \

@@ -14,7 +14,6 @@ REPOSHARE_ENV=$(REPOSHARE_PATH)/$(ZCI_ENV)
 
 GET_RND_PORT=`$(BUILD_HOME)/build/buildstep.sh getport`
 BACKEND_CONTAINER_NAME=$(name)
-NICKNAME="sparkmaster"
 
 OS_VERSION=centos:centos6
 
@@ -79,71 +78,23 @@ run :
 		exit 1; \
 	fi; \
 	\
-	if [ $(type) = "spark_standalone" ]; then\
-		echo "# Run spark standalone mode zeppelin! "; \
-		echo "# Host Port : $(ZEPPELIN_HOST_PORT_STANDALONE) , $(ZEPPELIN_HOST_WEBSOCKET_PORT_STANDALONE)"; \
-		docker run --rm -i \
-        -v $(REPOSHARE_PATH):/reposhare \
-		-e BRANCH=$(BRANCH) \
-		-e REPO=$(REPO) \
-		-e ZCI_ENV=$(ZCI_ENV) \
-		-e BUILD_TYPE=$(type) \
-		-e CONT_NAME=$(BACKEND_CONTAINER_NAME) \
-		-p $(ZEPPELIN_HOST_PORT_STANDALONE):$(ZEPPELIN_PORT) \
-		-p $(ZEPPELIN_HOST_WEBSOCKET_PORT_STANDALONE):$(ZEPPELIN_WEBSOCKET_PORT) \
-		--link $(BACKEND_CONTAINER_NAME):$(NICKNAME) \
-		zeppelin-$(type):$(IMAGE_VERSION) /bin/bash; \
-		\
-	elif [ $(type) = "spark_yarn" ]; then\
-		echo "# Run spark_yarn mode zeppelin! "; \
-		echo "# Host Port : $(ZEPPELIN_HOST_PORT_YARN) , $(ZEPPELIN_HOST_WEBSOCKET_PORT_YARN)"; \
-		docker run --rm -i \
-        -v $(REPOSHARE_PATH):/reposhare \
-		-e BRANCH=$(BRANCH) \
-		-e REPO=$(REPO) \
-		-e ZCI_ENV=$(ZCI_ENV) \
-		-e BUILD_TYPE=$(type) \
-		-e CONT_NAME=$(BACKEND_CONTAINER_NAME) \
-		-p $(ZEPPELIN_HOST_PORT_YARN):$(ZEPPELIN_PORT) \
-		-p $(ZEPPELIN_HOST_WEBSOCKET_PORT_YARN):$(ZEPPELIN_WEBSOCKET_PORT) \
-		--link $(BACKEND_CONTAINER_NAME):$(NICKNAME) \
-		zeppelin-$(type):$(IMAGE_VERSION) /bin/bash; \
-		\
-	elif [ $(type) = "spark_mesos" ]; then\
-		echo "# Run mesos backend zeppelin! "; \
-		echo "# Host Port : $(ZEPPELIN_HOST_PORT_MESOS) , $(ZEPPELIN_HOST_WEBSOCKET_PORT_MESOS)"; \
-		docker run --rm -i \
-        -v $(REPOSHARE_PATH):/reposhare \
-		-e BRANCH=$(BRANCH) \
-		-e REPO=$(REPO) \
-		-e ZCI_ENV=$(ZCI_ENV) \
-		-e BUILD_TYPE=$(type) \
-		-e CONT_NAME=$(BACKEND_CONTAINER_NAME) \
-		-p $(ZEPPELIN_HOST_PORT_MESOS):$(ZEPPELIN_PORT) \
-		-p $(ZEPPELIN_HOST_WEBSOCKET_PORT_MESOS):$(ZEPPELIN_WEBSOCKET_PORT) \
-		--link $(BACKEND_CONTAINER_NAME):$(NICKNAME) \
-		zeppelin-$(type):$(IMAGE_VERSION) /bin/bash; \
-		\
-	elif [ $(type) = "new_item" ]; then\
-		\
-		echo "Please set here zeppelin new_item."; \
-		\
-		docker run --rm -i \
-        -v $(REPOSHARE_PATH):/reposhare \
-		-e BRANCH=$(BRANCH) \
-		-e REPO=$(REPO) \
-		-e ZCI_ENV=$(ZCI_ENV) \
-		-e BUILD_TYPE=$(type) \
-		-e CONT_NAME=$(BACKEND_CONTAINER_NAME) \
-		-p $(GET_RND_PORT):$(ZEPPELIN_PORT) \
-		-p $(GET_RND_PORT):$(ZEPPELIN_WEBSOCKET_PORT) \
-		--link $(BACKEND_CONTAINER_NAME):$(NICKNAME) \
-		zeppelin-$(type):$(IMAGE_VERSION) /bin/bash; \
-		\
-	else\
-		echo "not found to run backend.";\
-		exit 1; \
-	fi  
+	echo "# Run spark standalone mode zeppelin! "; \
+	echo "# Host Port : $(ZEPPELIN_HOST_PORT_STANDALONE) , $(ZEPPELIN_HOST_WEBSOCKET_PORT_STANDALONE)"; \
+	\
+	docker run --rm -i \
+	-v $(REPOSHARE_PATH):/reposhare \
+	-e BRANCH=$(BRANCH) \
+	-e REPO=$(REPO) \
+	-e ZCI_ENV=$(ZCI_ENV) \
+	-e BUILD_TYPE=$(type) \
+	-e CONT_NAME=$(BACKEND_CONTAINER_NAME) \
+	-p $(ZEPPELIN_HOST_PORT_STANDALONE):$(ZEPPELIN_PORT) \
+	-p $(ZEPPELIN_HOST_WEBSOCKET_PORT_STANDALONE):$(ZEPPELIN_WEBSOCKET_PORT) \
+	--link spark_standalone_$(BACKEND_CONTAINER_NAME):spark_standalone \
+	--link spark_mesos_$(BACKEND_CONTAINER_NAME):spark_mesos \
+	--link spark_yarn_$(BACKEND_CONTAINER_NAME):spark_yarn \
+	zeppelin-$(type):$(IMAGE_VERSION) /bin/bash;
+	
 
 
 # ----------------------------------------------------------------------

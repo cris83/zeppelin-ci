@@ -30,9 +30,6 @@ RUN tar xzf /tmp/apache-maven-$MAVEN_VERSION-bin.tar.gz -C /usr/share \
 ENV MAVEN_HOME /usr/share/maven
 COPY maven-settings.xml /usr/share/maven/conf/settings.xml
 
-# copy zeppelin config.
-COPY zeppelin-env.sh /tmp/
-
 # Py4j for PySpark
 RUN easy_install py4j
 
@@ -46,6 +43,19 @@ RUN yum -y install xorg-x11-fonts-100dpi
 RUN yum -y install xorg-x11-fonts-75dpi
 RUN yum -y install xorg-x11-apps
 RUN yum -y install ImageMagick
+
+# install mesos
+RUN rpm -Uvh http://repos.mesosphere.com/el/6/noarch/RPMS/mesosphere-el-repo-6-2.noarch.rpm
+RUN yum -y install mesos
+
+# copy zeppelin config.
+COPY spark_standalone_zeppelin-env.sh /tmp/
+COPY spark_mesos_zeppelin-env.sh /tmp/
+COPY spark_yarn_zeppelin-env.sh /tmp/
+
+# copy spark config for yarn
+RUN mkdir -p /tmp/spark_conf
+COPY conf/* /tmp/spark_conf/
 
 # update reposhare
 RUN mkdir -p /reposhare

@@ -59,5 +59,5 @@
 # export ZEPPELIN_SPARK_CONCURRENTSQL   # Execute multiple SQL concurrently if set true. false by default.
 # export ZEPPELIN_SPARK_MAXRESULT       # Max number of SparkSQL result to display. 1000 by default.
 
-export MASTER="yarn-client"
-export HADOOP_CONF_DIR="/usr/share/spark/conf"     # yarn-site.xml is located in configuration directory in HADOOP_CONF_DIR.
+export MASTER=spark://spark_standalone:7077
+

@@ -31,7 +31,9 @@ do
 
     # setup
 	echo " - Setup : $SPARK_VER";
-    cp -f $REPO_HOME/$SPARK_BIN $REPOSHARE_PATH/
+    if [ ! -f $REPOSHARE_PATH/$SPARK_BIN ]; then
+		cp -f $REPO_HOME/$SPARK_BIN $REPOSHARE_PATH/
+	fi
 done
 
 
@@ -45,7 +47,10 @@ if [ ! -f $REPO_HOME/$FIREFOX_BIN ]; then
 	echo ""
     wget -P $REPO_HOME http://ftp.mozilla.org/pub/firefox/releases/31.0/linux-x86_64/en-US/$FIREFOX_BIN
 fi
-cp -f $REPO_HOME/$FIREFOX_BIN $REPOSHARE_PATH/
+
+if [ ! -f $REPOSHARE_PATH/$FIREFOX_BIN ]; then
+	cp -f $REPO_HOME/$FIREFOX_BIN $REPOSHARE_PATH/
+fi
 
 
 # ----------------------------------------------------------------------
