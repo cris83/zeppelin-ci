@@ -69,6 +69,23 @@ To run docker containers:
 * REPO & BRANCH : this parameter write your repository and branch that requested the `PR`.
 * In Jenkins, Supports the environment variable about `REPO & BRANCH` of requested the `PR`.
 
+### Auto Build CI via the Jenkins
+* Build Job ( Set Jenkins-Job )
+```VimL
+# zci.yml
+
+# -----------------------------------------
+#  Set parallel jobs
+#   - Max   : 4
+#   - Range : 1 ~ 4
+# -----------------------------------------
+BUILD_JOB:
+    1:spark_yarn
+    2:spark_mesos
+    3:spark_standalone
+    4:none
+```
+- It will specify the item to build.
 
 ### ScreenShots
 * When created PR or push.
