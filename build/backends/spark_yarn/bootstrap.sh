@@ -88,7 +88,13 @@ do
     SPARK_VER=$i
 	HADOOP_PRO=${HADOOP_VERSION%.*}
 	SPARK_DAT=spark-$SPARK_VER-bin-hadoop$HADOOP_PRO
+
     export SPARK_HOME="$SPARK_SHARE/$SPARK_DAT"
+
+	# create PID dir. test case detect pid file so they can select active spark home dir for test
+	mkdir -p ${SPARK_HOME}/run
+	export SPARK_PID_DIR=${SPARK_HOME}/run
+
     cd $SPARK_HOME/sbin
 
     ##### Build Step 1
