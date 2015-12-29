@@ -26,14 +26,19 @@ function first_build
 	SPARK_DAT=spark-$SPARK_VER-bin-hadoop$HADOOP_VER
 
 	mvn package -DskipTests -Pspark-$SPARK_PRO -Phadoop-$HADOOP_VER -Ppyspark -B
-	mvn package -Pbuild-distr -Pspark-$SPARK_PRO -Phadoop-$HADOOP_VER -Ppyspark -B
+	echo "- Done : mvn package Install spark-$SPARK_PRO, hadoop-$HADOOP_VER" 
 
+	mvn package -Pbuild-distr -Pspark-$SPARK_PRO -Phadoop-$HADOOP_VER -Ppyspark -B
+	echo "- Done : mvn package build-distr spark-$SPARK_PRO, hadoop-$HADOOP_VER"
+
+	echo "- Build mvn package with spark-$SPARK_PRO, hadoop-$HADOOP_VER"
 	\cp -f /tmp/zeppelin-env.sh /zeppelin/conf/
 	echo "export SPARK_HOME=$SPARK_SHARE/$SPARK_DAT" >> conf/zeppelin-env.sh
 	spark_conf "$SPARK_SHARE/$SPARK_DAT"
 
-	#mvn verify -Pusing-packaged-distr -Pspark-$SPARK_PRO -Phadoop-$HADOOP_VER -Ppyspark -B
-	sleep 3
+	#sleep 3
+	mvn verify -Pusing-packaged-distr -Pspark-$SPARK_PRO -Phadoop-$HADOOP_VER -Ppyspark -B
+	echo "# Done : mvn verify -Pusing-packaged-distr -Pspark-$SPARK_PRO -Phadoop-$HADOOP_VER -Ppyspark -B"
 }
 
 function skiptests_etc_build
@@ -43,9 +48,11 @@ function skiptests_etc_build
 	HADOOP_VER=$3
 	SPARK_DAT=spark-$SPARK_VER-bin-hadoop$HADOOP_VER
 
+	echo "- Build mvn package with skipTests"
     rm -rf /zeppelin/interpreter/spark
 	mvn package -DskipTests -Pspark-$SPARK_PRO -Phadoop-$HADOOP_VER -Ppyspark -B -pl 'zeppelin-interpreter,spark-dependencies,spark'
 
+	echo "- Build mvn package with spark-$SPARK_PRO, hadoop-$HADOOP_VER"
 	\cp -f /tmp/zeppelin-env.sh /zeppelin/conf/
 	echo "export SPARK_HOME=$SPARK_SHARE/$SPARK_DAT" >> conf/zeppelin-env.sh
 	spark_conf "$SPARK_SHARE/$SPARK_DAT"
@@ -61,9 +68,11 @@ function etc_build
     HADOOP_VER=$3
     SPARK_DAT=spark-$SPARK_VER-bin-hadoop$HADOOP_VER
 
+	echo "- Build mvn package without skipTests"
     rm -rf /zeppelin/interpreter/spark
 	mvn package -Pspark-$SPARK_PRO -Phadoop-$HADOOP_VER -Ppyspark -B -pl 'zeppelin-interpreter,spark-dependencies,spark'
 
+	echo "- Build mvn package with spark-$SPARK_PRO, hadoop-$HADOOP_VER"
     \cp -f /tmp/zeppelin-env.sh /zeppelin/conf/
     echo "export SPARK_HOME=$SPARK_SHARE/$SPARK_DAT" >> conf/zeppelin-env.sh
 	mvn package -Pspark-$SPARK_PRO -Phadoop-$HADOOP_VER -B -pl 'zeppelin-interpreter,zeppelin-zengine,zeppelin-server' -Dtest=org.apache.zeppelin.rest.*Test -DfailIfNoTests=false
@@ -122,9 +131,9 @@ do
 		first_build $SPARK_VERSION $SPARK_PROFILE $HADOOP_PROFILE
 	else
 		if [[ $SPARK_PROFILE == "1.2" || $SPARK_PROFILE == "1.1" ]]; then
-			etc_build $SPARK_VER $SPARK_PROFILE $HADOOP_PROFILE
+			etc_build $SPARK_VERSION $SPARK_PROFILE $HADOOP_PROFILE
 		else
-			skiptests_etc_build $SPARK_VER $SPARK_PROFILE $HADOOP_PROFILE
+			skiptests_etc_build $SPARK_VERSION $SPARK_PROFILE $HADOOP_PROFILE
 		fi
 	fi
 	let "arg_num+=1"
