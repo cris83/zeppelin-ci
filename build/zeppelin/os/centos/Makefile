@@ -22,15 +22,10 @@ OS_VERSION=centos:centos6
 # - Host Port
 # ----------------------------------------------------------------------
 
-ZEPPELIN_PORT = 8080
-ZEPPELIN_WEBSOCKET_PORT = 8081
-
+ZEPPELIN_PORT 							= 8080
+ZEPPELIN_WEBSOCKET_PORT 				= 8081
 ZEPPELIN_HOST_PORT_STANDALONE 			= $(GET_RND_PORT)
 ZEPPELIN_HOST_WEBSOCKET_PORT_STANDALONE = $(GET_RND_PORT)
-ZEPPELIN_HOST_PORT_YARN 				= $(GET_RND_PORT)
-ZEPPELIN_HOST_WEBSOCKET_PORT_YARN 		= $(GET_RND_PORT)
-ZEPPELIN_HOST_PORT_MESOS 				= $(GET_RND_PORT)
-ZEPPELIN_HOST_WEBSOCKET_PORT_MESOS 		= $(GET_RND_PORT)
 
 
 # ----------------------------------------------------------------------

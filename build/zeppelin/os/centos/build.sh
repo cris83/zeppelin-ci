@@ -33,8 +33,8 @@ function first_build_only_spark
 	echo "export SPARK_HOME=$SPARK_SHARE/$SPARK_DAT" >> conf/zeppelin-env.sh
 	spark_conf "$SPARK_SHARE/$SPARK_DAT"
 
-	sleep 3
-	#mvn verify -Drat.skip=true -Pusing-packaged-distr -Pspark-$SPARK_PRO -Phadoop-$HADOOP_VER -Ppyspark -B
+	#sleep 3
+	mvn verify -Drat.skip=true -Pusing-packaged-distr -Pspark-$SPARK_PRO -Phadoop-$HADOOP_VER -Ppyspark -Pscalding -B
 }
 
 function first_build
@@ -44,14 +44,16 @@ function first_build
 	HADOOP_VER=$3
 	SPARK_DAT=spark-$SPARK_VER-bin-hadoop$HADOOP_VER
 
+	# install
 	mvn package -DskipTests -Pspark-$SPARK_PRO -Phadoop-$HADOOP_VER -Ppyspark -Pscalding -B
+
+	# spark dep
 	mvn package -Pbuild-distr -Pspark-$SPARK_PRO -Phadoop-$HADOOP_VER -Ppyspark -Pscalding -B
 
 	\cp -f /tmp/${item}_zeppelin-env.sh /zeppelin/conf/
 	echo "export SPARK_HOME=$SPARK_SHARE/$SPARK_DAT" >> conf/zeppelin-env.sh
-
-	sleep 3
-	#mvn verify -Drat.skip=true -Pusing-packaged-distr -Pspark-$SPARK_PRO -Phadoop-$HADOOP_VER -Ppyspark -Pscalding -B
+	#sleep 3
+	mvn verify -Drat.skip=true -Pusing-packaged-distr -Pspark-$SPARK_PRO -Phadoop-$HADOOP_VER -Ppyspark -Pscalding -B
 }
 
 function skiptests_etc_build
@@ -112,7 +114,8 @@ cd /zeppelin
 # ----------------------------------------------------------------------
 arg_num=0
 IFS=' '
-items=( spark_standalone spark_mesos spark_yarn )
+#items=( spark_standalone spark_mesos spark_yarn )
+read -r -a items <<< "$BUILD_ITEMS"
 for item in ${items[@]}
 do
 	echo "- Set ${item} Buildstep"
