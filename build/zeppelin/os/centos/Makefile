@@ -9,7 +9,7 @@
 # ----------------------------------------------------------------------
 
 LOCALREPO_BIN=$(BUILD_HOME)/build/localrepo/bin
-LOCALREPO_DAT=$(BUILD_HOME)/build/localrepo/dat
+LOCALREPO_DAT=/opt/localrepo
 REPOSHARE_ENV=$(REPOSHARE_PATH)/$(ZCI_ENV)
 
 GET_RND_PORT=`$(BUILD_HOME)/build/buildstep.sh getport`
@@ -38,7 +38,7 @@ docker_build = \
 	$(LOCALREPO_BIN)/get_confirm_build_dat.sh $(REPOSHARE_ENV) $(LOCALREPO_DAT); \
 	cp build.sh $1; \
 	sed -i -e 's/DOCKER_VAR_OS/$(OS_VERSION)/g' $1/Dockerfile; \
-	docker build --pull=false -t zeppelin-"$1:$(IMAGE_VERSION)" $1/;
+	docker build --pull=false -t "$1:$(IMAGE_VERSION)" $1/;
 
 
 # ----------------------------------------------------------------------
@@ -88,7 +88,7 @@ run :
 	--link spark_standalone_$(BACKEND_CONTAINER_NAME):spark_standalone \
 	--link spark_mesos_$(BACKEND_CONTAINER_NAME):spark_mesos \
 	--link spark_yarn_$(BACKEND_CONTAINER_NAME):spark_yarn \
-	zeppelin-$(type):$(IMAGE_VERSION) /bin/bash;
+	$(type):$(IMAGE_VERSION) /bin/bash;
 
 
 # ----------------------------------------------------------------------

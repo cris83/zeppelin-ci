@@ -149,7 +149,7 @@ function buildstep_getport
 {
 	while true
 	do
-		# rnd port : 10000 ~ 65000
+		# Random Port : 10000 ~ 65000
 		port=`head -100 /dev/urandom | cksum | cut -f1 -d " " | awk '{print $1%55000+10000}'`
 		res=`nc -z -v localhost $port 2>&1 | grep succ | wc -l`
 		if [[ $res == 0 ]]; then
@@ -165,7 +165,7 @@ function buildstep_getport
 
 function buildstep
 {
-	if [[ $1 != "init" ]]; then
+	if [[ $1 == "waitfor" || $1 == "log" ]]; then
 		source $BS_PROFILE
 		BS_LOGPATH=$BS_PATH
 	fi

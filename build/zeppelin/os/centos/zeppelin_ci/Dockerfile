@@ -44,6 +44,11 @@ COPY maven-settings.xml /usr/share/maven/conf/settings.xml
 # Py4j for PySpark
 RUN easy_install py4j
 
+# firefox dependencies
+ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:/usr/local/firefox:/usr/lib:/usr/local/lib:/usr/lib64:/usr/local/lib64:/lib64:/lib
+RUN yum install -y alsa-lib.x86_64
+RUN yum install -y libmozalloc.so
+
 # fake display with firefox 
 ENV DISPLAY :99
 RUN rpm -Uvh http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm

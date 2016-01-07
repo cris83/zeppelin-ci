@@ -10,7 +10,7 @@
 
 BUILD_HOME=$(shell pwd)
 LOCALREPO_BIN=$(BUILD_HOME)/build/localrepo/bin
-LOCALREPO_DAT=$(BUILD_HOME)/build/localrepo/dat
+LOCALREPO_DAT=/opt/localrepo
 
 ZCI_ENV_FILE=.zci.env
 ZCI_ENV=$(BUILD_HOME)/$(ZCI_ENV_FILE)
@@ -46,11 +46,7 @@ setup_zepp = \
 	cp -f build/zeppelin/os/centos/build.sh $(ZEPPELIN_BUILD_DIR)/os/centos
 
 env_job = \
-	@source $(ZCI_ENV); \
-	echo "* Image Version  : $$IMAGE_VERSION";\
-	echo "* JDK Version    : $$JDK_VERSION";\
-	echo "* Hadoop Version : $$HADOOP_VERSION";\
-	echo "* Spark Version  : $$SPARK_VERSION";\
+	@source $(ZCI_ENV);
 
 run_job =  \
 	source $(ZCI_ENV); \
@@ -112,8 +108,8 @@ help:
 	@echo 
 
 env :
+	@echo "$(ZCI_ENV)" > .envfile
 	@build/buildstep.sh envload $(ZCI_YML) $(ZCI_ENV)
-	$(call env_job)
 
 build : env
 	@if [ -z $(type) ]; then \
