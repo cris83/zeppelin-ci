@@ -19,10 +19,6 @@ ZCI_YML=$(BUILD_HOME)/zci.yml
 
 REPOSHARE_DIR=/tmp/build/reposhare
 
-#BUILD_DIR=/tmp/build/build/
-#ZEPPELIN_BUILD_DIR=/tmp/build/build/zeppelin
-#INTERPRETER_BUILD_DIR=/tmp/build/build/backends
-
 BUILD_DIR=/tmp/build/$(userhome)
 ZEPPELIN_BUILD_DIR=$(BUILD_DIR)/zeppelin
 INTERPRETER_BUILD_DIR=$(BUILD_DIR)/backends
@@ -31,10 +27,6 @@ INTERPRETER_BUILD_DIR=$(BUILD_DIR)/backends
 # -----------------------------------------------------------------------------
 # - Call Funtions
 # -----------------------------------------------------------------------------
-
-#setup_comm = \
-#	mkdir -p $(REPOSHARE_DIR); \
-#	cp -f $(ZCI_ENV) $(REPOSHARE_DIR)
 
 setup_comm = \
 	mkdir -p $(REPOSHARE_DIR); \
