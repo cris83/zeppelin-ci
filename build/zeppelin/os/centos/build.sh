@@ -25,10 +25,10 @@ function first_build
 	HADOOP_VER=$3
 	SPARK_DAT=spark-$SPARK_VER-bin-hadoop$HADOOP_VER
 
-	mvn package -DskipTests -Pspark-$SPARK_PRO -Phadoop-$HADOOP_VER -Ppyspark -B
+	mvn package -DskipTests -Pspark-$SPARK_PRO -Phadoop-$HADOOP_VER -Ppyspark -Pscalding -B
 	echo "- Done : mvn package Install spark-$SPARK_PRO, hadoop-$HADOOP_VER" 
 
-	mvn package -Pbuild-distr -Pspark-$SPARK_PRO -Phadoop-$HADOOP_VER -Ppyspark -B
+	mvn package -Pbuild-distr -Pspark-$SPARK_PRO -Phadoop-$HADOOP_VER -Ppyspark -Pscalding -B
 	echo "- Done : mvn package build-distr spark-$SPARK_PRO, hadoop-$HADOOP_VER"
 
 	echo "- Build mvn package with spark-$SPARK_PRO, hadoop-$HADOOP_VER"
@@ -36,8 +36,7 @@ function first_build
 	echo "export SPARK_HOME=$SPARK_SHARE/$SPARK_DAT" >> conf/zeppelin-env.sh
 	spark_conf "$SPARK_SHARE/$SPARK_DAT"
 
-	#sleep 3
-	mvn verify -Pusing-packaged-distr -Pspark-$SPARK_PRO -Phadoop-$HADOOP_VER -Ppyspark -B
+	mvn verify -Drat.skip=true -Pusing-packaged-distr -Pspark-$SPARK_PRO -Phadoop-$HADOOP_VER -Ppyspark -Pscalding -B
 	echo "# Done : mvn verify -Pusing-packaged-distr -Pspark-$SPARK_PRO -Phadoop-$HADOOP_VER -Ppyspark -B"
 }
 
