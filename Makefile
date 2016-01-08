@@ -75,7 +75,6 @@ run_job =  \
 			  fi; \
 			); done \
 		fi; \
-	/bin/echo " "; \
 	); done	
 
 
