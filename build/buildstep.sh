@@ -165,7 +165,7 @@ function buildstep_getport
 
 function buildstep
 {
-	if [[ $1 != "init" ]]; then
+	if [[ $1 == "waitfor" || $1 == "log" ]]; then
 		source $BS_PROFILE
 		BS_LOGPATH=$BS_PATH
 	fi
