@@ -9,53 +9,56 @@
 # -----------------------------------------------------------------------------
 
 BUILD_HOME=$(shell pwd)
-LOCALREPO_BIN=$(BUILD_HOME)/build/localrepo/bin
-LOCALREPO_DAT=/opt/localrepo
 
-ZCI_ENV_FILE=.zci.env
-USER_ZCI_ENV=$(ZCI_ENV_FILE).$(userhome)
-ZCI_ENV=$(BUILD_HOME)/$(ZCI_ENV_FILE)
-ZCI_YML=$(BUILD_HOME)/zci.yml
-
+BUILD_DIR=/tmp/build/$(name)
 REPOSHARE_DIR=/tmp/build/reposhare
-
-BUILD_DIR=/tmp/build/$(userhome)
 ZEPPELIN_BUILD_DIR=$(BUILD_DIR)/zeppelin
 INTERPRETER_BUILD_DIR=$(BUILD_DIR)/backends
+
+LOCALREPO_DAT=/opt/localrepo
+LOCALREPO_BIN=$(BUILD_HOME)/build/localrepo/bin
+
+#ZCI_ENV=$(BUILD_HOME)/zeppelin/zeppelin-ci/build/conf
+ZCI_ENV=$(BUILD_HOME)/build/conf
+ZCI_ENV_FILE=$(BUILD_HOME)/build/conf/.zci.env
+
+ZEPP_HOME=$(REPOSHARE_DIR)/users/$(name)
+USER_ZCI_ENV=$(ZEPP_HOME)/zeppelin/zeppelin-ci/build/conf
 
 
 # -----------------------------------------------------------------------------
 # - Call Funtions
 # -----------------------------------------------------------------------------
 
-setup_comm = \
-	mkdir -p $(REPOSHARE_DIR); \
-	cp -f $(ZCI_ENV) $(REPOSHARE_DIR)/$(USER_ZCI_ENV)
-
 setup_back = \
-	$(call setup_comm); \
 	mkdir -p $(INTERPRETER_BUILD_DIR); \
 	rm -rf $(INTERPRETER_BUILD_DIR)/$(item); \
-	cp -rf build/backends/$(item) $(INTERPRETER_BUILD_DIR); \
-	cp -f build/backends/Makefile $(INTERPRETER_BUILD_DIR)
+	\
+	if [ -f build/backends/Makefile ] && [ -d build/backends/$(item) ]; then \
+		cp -f build/backends/Makefile $(INTERPRETER_BUILD_DIR); \
+		cp -rf build/backends/$(item) $(INTERPRETER_BUILD_DIR); \
+	else \
+		echo ""; echo "* Backends - No such file or directory : $(item)"; \
+        $(BUILD_HOME)/build/buildstep.sh putres $(REPOSHARE_DIR) $(name) 1; \
+	fi
 
 setup_zepp = \
-	$(call setup_comm); \
 	mkdir -p $(ZEPPELIN_BUILD_DIR)/os/centos; \
 	rm -rf $(ZEPPELIN_BUILD_DIR)/os/centos/$(item); \
-	cp -rf build/zeppelin/os/centos/$(item) $(ZEPPELIN_BUILD_DIR)/os/centos; \
-	cp -f build/zeppelin/os/centos/Makefile $(ZEPPELIN_BUILD_DIR)/os/centos; \
-	cp -f build/zeppelin/os/centos/build.sh $(ZEPPELIN_BUILD_DIR)/os/centos
-
-env_job = \
-	@source $(ZCI_ENV); \
-	echo "* Image Version  : $$IMAGE_VERSION";\
-	echo "* JDK Version    : $$JDK_VERSION";\
-	echo "* Hadoop Version : $$HADOOP_VERSION";\
-	echo "* Spark Version  : $$SPARK_VERSION";\
+	\
+	if [ -f build/zeppelin/os/centos/Makefile ] && \
+	   [ -f build/zeppelin/os/centos/build.sh ] && \
+	   [ -d build/zeppelin/os/centos/$(item)  ]; then \
+		cp -f build/zeppelin/os/centos/Makefile $(ZEPPELIN_BUILD_DIR)/os/centos; \
+		cp -f build/zeppelin/os/centos/build.sh $(ZEPPELIN_BUILD_DIR)/os/centos; \
+		cp -rf build/zeppelin/os/centos/$(item) $(ZEPPELIN_BUILD_DIR)/os/centos; \
+	else \
+		echo ""; echo "* Zeppelin - No such file or directory : $(item)"; \
+        $(BUILD_HOME)/build/buildstep.sh putres $(REPOSHARE_DIR) $(name) 1; \
+	fi
 
 run_job =  \
-	source $(ZCI_ENV); \
+	source $(ZCI_ENV_FILE); \
 	for dir in $$(find $(1) -type d); do \
 	  ( \
 		cd $$dir ; \
@@ -68,18 +71,16 @@ run_job =  \
 					make $2 -f Makefile \
 						type=`basename $$t` \
 						name=$(name) \
-						REPO=$(REPO) \
-						BRANCH=$(BRANCH) \
 						BUILD_HOME=$(BUILD_HOME) \
 						BUILD_PATH=$$t \
-						ZCI_ENV=$(USER_ZCI_ENV) \
+						ZCI_ENV=$(ZCI_ENV) \
 						REPOSHARE_PATH=$(REPOSHARE_DIR); \
 					$(BUILD_HOME)/build/buildstep.sh putres $(REPOSHARE_DIR) $(name) $$?; \
+					echo ""; \
 			  	fi; \
 			  fi; \
 			); done \
 		fi; \
-	/bin/echo " "; \
 	); done	
 
 
@@ -114,8 +115,7 @@ help:
 	@echo 
 
 env :
-	@echo "$(ZCI_ENV)" > .envfile
-	@build/buildstep.sh envload $(ZCI_YML) $(ZCI_ENV)
+	@build/ciyaml
 
 build : env
 	@if [ -z $(type) ]; then \
@@ -128,7 +128,7 @@ build : env
 	fi; \
 	echo "* Build Type     : $(type)"; echo ""; \
 	\
-	$(LOCALREPO_BIN)/get_build_dat.sh $(ZCI_ENV) $(LOCALREPO_DAT); \
+	$(LOCALREPO_BIN)/get_build_dat.sh $(LOCALREPO_BIN) $(ZCI_ENV) $(LOCALREPO_DAT); \
 	if [ "$(type)" = "backend" ]; then \
 		$(call setup_back); \
 		$(call run_job,$(INTERPRETER_BUILD_DIR),$@,$(item)) \
@@ -140,7 +140,7 @@ build : env
 		exit 1; \
 	fi;
 
-run : env
+run :
 	@if [ -z $(type) ]; then \
 		echo "Type \"make help\" to run. please..";\
 		exit 1; \

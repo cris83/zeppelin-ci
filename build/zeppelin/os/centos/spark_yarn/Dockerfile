@@ -32,7 +32,7 @@ RUN tar xzf /tmp/apache-maven-$MAVEN_VERSION-bin.tar.gz -C /usr/share \
   && mv /usr/share/apache-maven-$MAVEN_VERSION /usr/share/maven \
   && ln -s /usr/share/maven/bin/mvn /usr/bin/mvn
 ENV MAVEN_HOME /usr/share/maven
-COPY maven-settings.xml /usr/share/maven/conf/settings.xml
+###COPY maven-settings.xml /usr/share/maven/conf/settings.xml
 
 # copy zeppelin config.
 COPY zeppelin-env.sh /tmp/
@@ -64,15 +64,16 @@ RUN easy_install py4j
 RUN mkdir -p /reposhare
 
 # update buildstep
-COPY buildstep.sh /buildstep.sh
-RUN chown root.root /buildstep.sh
-RUN chmod 700 /buildstep.sh
+#COPY buildstep.sh /buildstep.sh
+#RUN chown root.root /buildstep.sh
+#RUN chmod 700 /buildstep.sh
 
 # update boot script
-COPY build.sh /build.sh
-RUN chown root.root /build.sh
-RUN chmod 700 /build.sh
+#COPY build.sh /build.sh
+#RUN chown root.root /build.sh
+#RUN chmod 700 /build.sh
 
 EXPOSE 8080 8081
 
-ENTRYPOINT ["/build.sh"]
+#ENTRYPOINT ["/build.sh"]
+ENTRYPOINT ["/reposhare/scripts/build.sh"]

@@ -8,17 +8,14 @@
 # - Define Varialbes 
 # ----------------------------------------------------------------------
 
-LOCALREPO_BIN=$(BUILD_HOME)/build/localrepo/bin
+OS_VERSION=centos:centos6
 LOCALREPO_DAT=/opt/localrepo
-REPOSHARE_ENV=$(REPOSHARE_PATH)/$(ZCI_ENV)
+LOCALREPO_BIN=$(BUILD_HOME)/build/localrepo/bin
 
 
 # ----------------------------------------------------------------------
 # - Host Port
 # ----------------------------------------------------------------------
-
-# get random host port
-GET_RND_PORT=`$(BUILD_HOME)/build/buildstep.sh getport`
 
 # zeppelin ports
 ZEPPELIN_PORT = 8080
@@ -54,9 +51,9 @@ YARN_RM_ADMIN_PORT = 8033
 
 docker_build = \
 	@echo ""; \
-	$(LOCALREPO_BIN)/get_confirm_build_dat.sh $(REPOSHARE_ENV) $(LOCALREPO_DAT); \
-	sed -i -e 's/DOCKER_VAR_OS/centos:centos6/g' $1/Dockerfile; \
-	docker build --pull=false -t "$1:$$IMAGE_VERSION" $1/
+	$(LOCALREPO_BIN)/get_confirm_build_dat.sh $(LOCALREPO_BIN) $(ZCI_ENV) $(LOCALREPO_DAT); \
+	sed -i -e 's/DOCKER_VAR_OS/$(OS_VERSION)/g' $1/Dockerfile; \
+	docker build --pull=false -t "$1:$(IMAGE_VERSION)" $1/
 
 
 # ----------------------------------------------------------------------
@@ -79,7 +76,7 @@ help:
 
 build :
 	@if [ -z $(type) ]; then \
-		echo "Type \"make help\" to run. please..";\
+		echo "Type \"make help\" to run. please.."; \
 		exit 1; \
 	fi
 	$(call docker_build,$(type))
@@ -90,7 +87,7 @@ run :
 		exit 1; \
 	fi; \
 	\
-	$(LOCALREPO_BIN)/get_confirm_build_dat.sh $(REPOSHARE_ENV) $(LOCALREPO_DAT); \
+	$(LOCALREPO_BIN)/get_confirm_build_dat.sh $(LOCALREPO_BIN) $(ZCI_ENV) $(LOCALREPO_DAT);
 	\
 	if [ $(type) = "spark_standalone" ]; then \
 		docker run -id \
@@ -100,11 +97,11 @@ run :
 		-e CONT_NAME=$(name) \
 		--name $(name) \
 		-h sparkmaster \
-		-p $(GET_RND_PORT):$(ZEPPELIN_PORT) \
-		-p $(GET_RND_PORT):$(SPARK_MASTER_PORT) \
-		-p $(GET_RND_PORT):$(SPARK_MASTER_WEBUI_PORT) \
-		-p $(GET_RND_PORT):$(SPARK_WORKER_WEBUI_PORT) \
-		-p $(GET_RND_PORT):$(ZEPPELIN_WEBSOCKET_PORT) \
+		-p $(ZEPPELIN_PORT) \
+		-p $(SPARK_MASTER_PORT) \
+		-p $(SPARK_MASTER_WEBUI_PORT) \
+		-p $(SPARK_WORKER_WEBUI_PORT) \
+		-p $(ZEPPELIN_WEBSOCKET_PORT) \
 		$(type):$(IMAGE_VERSION) /bin/bash; \
 		\
 	elif [ $(type) = "spark_yarn" ]; then \
@@ -115,23 +112,23 @@ run :
 		-e CONT_NAME=$(name) \
 		--name $(name) \
 		-h sparkmaster \
-		-p $(GET_RND_PORT):$(ZEPPELIN_PORT) \
-		-p $(GET_RND_PORT):$(SPARK_MASTER_PORT) \
-		-p $(GET_RND_PORT):$(SPARK_MASTER_WEBUI_PORT) \
-		-p $(GET_RND_PORT):$(SPARK_WORKER_WEBUI_PORT) \
-		-p $(GET_RND_PORT):$(ZEPPELIN_WEBSOCKET_PORT) \
-		-p $(GET_RND_PORT):$(HDFS_NN_COMMAND_PORT) \
-		-p $(GET_RND_PORT):$(YARN_JOB_TRACKER_PORT) \
-		-p $(GET_RND_PORT):$(YARN_RM_HTTP_PORT) \
-		-p $(GET_RND_PORT):$(YARN_NN_HTTP_PORT) \
-		-p $(GET_RND_PORT):$(YARN_RM_SCHEDULER_PORT) \
-		-p $(GET_RND_PORT):$(YARN_RM_RT_PORT) \
-		-p $(GET_RND_PORT):$(YARN_RM_PORT) \
-		-p $(GET_RND_PORT):$(YARN_RM_ADMIN_PORT) \
-		-p $(GET_RND_PORT):$(HDFS_DN_DATA_PORT) \
-		-p $(GET_RND_PORT):$(HDFS_DN_COMMAND_PORT) \
-		-p $(GET_RND_PORT):$(HDFS_DN_HTTP_PORT) \
-		-p $(GET_RND_PORT):$(HDFS_NN_HTTP_PORT) \
+		-p $(ZEPPELIN_PORT) \
+		-p $(SPARK_MASTER_PORT) \
+		-p $(SPARK_MASTER_WEBUI_PORT) \
+		-p $(SPARK_WORKER_WEBUI_PORT) \
+		-p $(ZEPPELIN_WEBSOCKET_PORT) \
+		-p $(HDFS_NN_COMMAND_PORT) \
+		-p $(YARN_JOB_TRACKER_PORT) \
+		-p $(YARN_RM_HTTP_PORT) \
+		-p $(YARN_NN_HTTP_PORT) \
+		-p $(YARN_RM_SCHEDULER_PORT) \
+		-p $(YARN_RM_RT_PORT) \
+		-p $(YARN_RM_PORT) \
+		-p $(YARN_RM_ADMIN_PORT) \
+		-p $(HDFS_DN_DATA_PORT) \
+		-p $(HDFS_DN_COMMAND_PORT) \
+		-p $(HDFS_DN_HTTP_PORT) \
+		-p $(HDFS_NN_HTTP_PORT) \
 		$(type):$(IMAGE_VERSION) /bin/bash; \
 		\
 	elif [ $(type) = "spark_mesos" ]; then\
@@ -142,12 +139,12 @@ run :
 		-e CONT_NAME=$(name) \
 		--name $(name) \
 		-h sparkmaster \
-		-p $(GET_RND_PORT):$(ZEPPELIN_PORT) \
-		-p $(GET_RND_PORT):$(SPARK_MASTER_PORT) \
-		-p $(GET_RND_PORT):$(SPARK_MASTER_WEBUI_PORT) \
-		-p $(GET_RND_PORT):$(SPARK_WORKER_WEBUI_PORT) \
-		-p $(GET_RND_PORT):$(ZEPPELIN_WEBSOCKET_PORT) \
-		-p $(GET_RND_PORT):$(MESOS_PORT) \
+		-p $(ZEPPELIN_PORT) \
+		-p $(SPARK_MASTER_PORT) \
+		-p $(SPARK_MASTER_WEBUI_PORT) \
+		-p $(SPARK_WORKER_WEBUI_PORT) \
+		-p $(ZEPPELIN_WEBSOCKET_PORT) \
+		-p $(MESOS_PORT) \
 		$(type):$(IMAGE_VERSION) /bin/bash; \
 		\
 	elif [ $(type) = "new_item" ]; then\
@@ -158,9 +155,11 @@ run :
 		echo "not found to run backend."; \
 	fi
 
+
 # ----------------------------------------------------
 # - New_item Adding Guide
 # ----------------------------------------------------
+#
 # * Common :
 #
 #	docker run -id \
@@ -175,13 +174,14 @@ run :
 #   ...
 #	$(type):$(IMAGE_VERSION) /bin/bash; \
 #
-# ----------------------------------------------------
+# 
 # * Do it yourself setting new_item : Ports
 #
 #	-p $(GET_RND_PORT):$(NEW_ITEM_PORT) \
 #	-p $(GET_RND_PORT):$(...) \
 #
 # ----------------------------------------------------
+
 
 # ----------------------------------------------------------------------
 # - End of File

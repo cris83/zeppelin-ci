@@ -8,15 +8,13 @@
 # - Define Varialbes 
 # ----------------------------------------------------------------------
 
-LOCALREPO_BIN=$(BUILD_HOME)/build/localrepo/bin
+OS_VERSION=centos:centos6
 LOCALREPO_DAT=/opt/localrepo
-REPOSHARE_ENV=$(REPOSHARE_PATH)/$(ZCI_ENV)
+LOCALREPO_BIN=$(BUILD_HOME)/build/localrepo/bin
+ZCI_ENV_FILE=$(ZCI_ENV)/.zci.env
 
-GET_RND_PORT=`$(BUILD_HOME)/build/buildstep.sh getport`
 BACKEND_CONTAINER_NAME=$(name)
 NICKNAME="sparkmaster"
-
-OS_VERSION=centos:centos6
 
 
 # ----------------------------------------------------------------------
@@ -26,13 +24,6 @@ OS_VERSION=centos:centos6
 ZEPPELIN_PORT = 8080
 ZEPPELIN_WEBSOCKET_PORT = 8081
 
-ZEPPELIN_HOST_PORT_STANDALONE 			= $(GET_RND_PORT)
-ZEPPELIN_HOST_WEBSOCKET_PORT_STANDALONE = $(GET_RND_PORT)
-ZEPPELIN_HOST_PORT_YARN 				= $(GET_RND_PORT)
-ZEPPELIN_HOST_WEBSOCKET_PORT_YARN 		= $(GET_RND_PORT)
-ZEPPELIN_HOST_PORT_MESOS 				= $(GET_RND_PORT)
-ZEPPELIN_HOST_WEBSOCKET_PORT_MESOS 		= $(GET_RND_PORT)
-
 
 # ----------------------------------------------------------------------
 # - Call Function
@@ -40,17 +31,15 @@ ZEPPELIN_HOST_WEBSOCKET_PORT_MESOS 		= $(GET_RND_PORT)
 
 docker_build = \
 	echo ""; \
-	source $(REPOSHARE_PATH)/$(ZCI_ENV); \
-	$(LOCALREPO_BIN)/get_confirm_build_dat.sh $(REPOSHARE_ENV) $(LOCALREPO_DAT); \
 	cp build.sh $1; \
+	$(LOCALREPO_BIN)/get_confirm_build_dat.sh $(LOCALREPO_BIN) $(ZCI_ENV) $(LOCALREPO_DAT); \
 	sed -i -e 's/DOCKER_VAR_OS/$(OS_VERSION)/g' $1/Dockerfile; \
-	docker build --pull=false -t zeppelin-"$1:$(IMAGE_VERSION)" $1/;
+	docker build --pull=false -t zeppelin-"$1:$(IMAGE_VERSION)" $1
 
 
 # ----------------------------------------------------------------------
 # - Build Options
 # ----------------------------------------------------------------------
-
 help:
 	@echo
 	@echo "  Several choices : "
@@ -66,84 +55,43 @@ help:
 	@echo 
 
 
-build : 
+build :
 	@if [ -z $(type) ]; then \
-		echo "Type \"make help\" to run. please..";\
+		echo "Type \"make help\" to run. please.."; \
 		exit 1; \
 	fi; \
 	$(call docker_build,$(type))
 	
 run : 
 	@if [ -z $(type) ]; then \
-		echo "Type \"make help\" to run. please..";\
+		echo "Type \"make help\" to run. please.."; \
 		exit 1; \
 	fi; \
 	\
-	if [ $(type) = "spark_standalone" ]; then\
-		echo "# Run spark standalone mode zeppelin! "; \
-		echo "# Host Port : $(ZEPPELIN_HOST_PORT_STANDALONE) , $(ZEPPELIN_HOST_WEBSOCKET_PORT_STANDALONE)"; \
-		docker run --rm -i \
-        -v $(REPOSHARE_PATH):/reposhare \
-		-e BRANCH=$(BRANCH) \
-		-e REPO=$(REPO) \
-		-e ZCI_ENV=$(ZCI_ENV) \
-		-e BUILD_TYPE=$(type) \
-		-e CONT_NAME=$(BACKEND_CONTAINER_NAME) \
-		-p $(ZEPPELIN_HOST_PORT_STANDALONE):$(ZEPPELIN_PORT) \
-		-p $(ZEPPELIN_HOST_WEBSOCKET_PORT_STANDALONE):$(ZEPPELIN_WEBSOCKET_PORT) \
-		--link $(BACKEND_CONTAINER_NAME):$(NICKNAME) \
-		zeppelin-$(type):$(IMAGE_VERSION) /bin/bash; \
+	case $(type) in
+	    spark_standalone | \
+	    spark_yarn 		 | \
+	    spark_mesos 	 | \
+	    new_item ) \
 		\
-	elif [ $(type) = "spark_yarn" ]; then\
-		echo "# Run spark_yarn mode zeppelin! "; \
-		echo "# Host Port : $(ZEPPELIN_HOST_PORT_YARN) , $(ZEPPELIN_HOST_WEBSOCKET_PORT_YARN)"; \
-		docker run --rm -i \
-        -v $(REPOSHARE_PATH):/reposhare \
-		-e BRANCH=$(BRANCH) \
-		-e REPO=$(REPO) \
-		-e ZCI_ENV=$(ZCI_ENV) \
-		-e BUILD_TYPE=$(type) \
-		-e CONT_NAME=$(BACKEND_CONTAINER_NAME) \
-		-p $(ZEPPELIN_HOST_PORT_YARN):$(ZEPPELIN_PORT) \
-		-p $(ZEPPELIN_HOST_WEBSOCKET_PORT_YARN):$(ZEPPELIN_WEBSOCKET_PORT) \
-		--link $(BACKEND_CONTAINER_NAME):$(NICKNAME) \
-		zeppelin-$(type):$(IMAGE_VERSION) /bin/bash; \
+			echo "# Run $(type) mode zeppelin! "; \
+			docker run -id \
+			-v $(REPOSHARE_PATH):/reposhare \
+			-e ZCI_ENV=$(ZCI_ENV) \
+			-e BUILD_TYPE=$(type) \
+			-e CONT_NAME=$(BACKEND_CONTAINER_NAME) \
+			-p $(ZEPPELIN_PORT) \
+			-p $(ZEPPELIN_WEBSOCKET_PORT) \
+			--link $(BACKEND_CONTAINER_NAME):$(NICKNAME) \
+			--name zeppelin-$(BACKEND_CONTAINER_NAME) \
+			zeppelin-$(type):$(IMAGE_VERSION) /bin/bash; \
+		;; \
 		\
-	elif [ $(type) = "spark_mesos" ]; then\
-		echo "# Run mesos backend zeppelin! "; \
-		echo "# Host Port : $(ZEPPELIN_HOST_PORT_MESOS) , $(ZEPPELIN_HOST_WEBSOCKET_PORT_MESOS)"; \
-		docker run --rm -i \
-        -v $(REPOSHARE_PATH):/reposhare \
-		-e BRANCH=$(BRANCH) \
-		-e REPO=$(REPO) \
-		-e ZCI_ENV=$(ZCI_ENV) \
-		-e BUILD_TYPE=$(type) \
-		-e CONT_NAME=$(BACKEND_CONTAINER_NAME) \
-		-p $(ZEPPELIN_HOST_PORT_MESOS):$(ZEPPELIN_PORT) \
-		-p $(ZEPPELIN_HOST_WEBSOCKET_PORT_MESOS):$(ZEPPELIN_WEBSOCKET_PORT) \
-		--link $(BACKEND_CONTAINER_NAME):$(NICKNAME) \
-		zeppelin-$(type):$(IMAGE_VERSION) /bin/bash; \
-		\
-	elif [ $(type) = "new_item" ]; then\
-		\
-		echo "Please set here zeppelin new_item."; \
-		\
-		docker run --rm -i \
-        -v $(REPOSHARE_PATH):/reposhare \
-		-e BRANCH=$(BRANCH) \
-		-e REPO=$(REPO) \
-		-e ZCI_ENV=$(ZCI_ENV) \
-		-e BUILD_TYPE=$(type) \
-		-e CONT_NAME=$(BACKEND_CONTAINER_NAME) \
-		-p $(GET_RND_PORT):$(ZEPPELIN_PORT) \
-		-p $(GET_RND_PORT):$(ZEPPELIN_WEBSOCKET_PORT) \
-		--link $(BACKEND_CONTAINER_NAME):$(NICKNAME) \
-		zeppelin-$(type):$(IMAGE_VERSION) /bin/bash; \
-		\
-	else\
-		echo "not found to run backend.";\
-		exit 1; \
-	fi  
+		*) \
+			echo "not found to run backend."; \
+			exit 1; \
+		;; \
+	esac
 
 
 # ----------------------------------------------------------------------

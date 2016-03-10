@@ -26,9 +26,9 @@ ENV JAVA_HOME /usr/java/default
 ENV PATH $PATH:$JAVA_HOME/bin
 
 # get hadoop 
-RUN mkdir -p /tmp/hadoop
-ADD hadoop.tar.gz /tmp/hadoop
-RUN ln -s /tmp/hadoop/hadoop* /usr/local/hadoop
+#RUN mkdir -p /tmp/hadoop
+#ADD hadoop.tar.gz /tmp/hadoop
+#RUN ln -s /tmp/hadoop/hadoop* /usr/local/hadoop
 
 ENV HADOOP_PREFIX /usr/local/hadoop
 ENV HADOOP_COMMON_HOME /usr/local/hadoop
@@ -37,26 +37,31 @@ ENV HADOOP_MAPRED_HOME /usr/local/hadoop
 ENV HADOOP_YARN_HOME /usr/local/hadoop
 ENV HADOOP_CONF_DIR /usr/local/hadoop/etc/hadoop
 
-RUN sed -i '/^export JAVA_HOME/ s:.*:export JAVA_HOME=/usr/java/default\nexport HADOOP_PREFIX=/usr/local/hadoop\nexport HADOOP_HOME=/usr/local/hadoop\n:' $HADOOP_PREFIX/etc/hadoop/hadoop-env.sh
-RUN sed -i '/^export HADOOP_CONF_DIR/ s:.*:export HADOOP_CONF_DIR=/usr/local/hadoop/etc/hadoop/:' $HADOOP_PREFIX/etc/hadoop/hadoop-env.sh
+###################
+##RUN sed -i '/^export JAVA_HOME/ s:.*:export JAVA_HOME=/usr/java/default\nexport HADOOP_PREFIX=/usr/local/hadoop\nexport HADOOP_HOME=/usr/local/hadoop\n:' $HADOOP_PREFIX/etc/hadoop/hadoop-env.sh
+##RUN sed -i '/^export HADOOP_CONF_DIR/ s:.*:export HADOOP_CONF_DIR=/usr/local/hadoop/etc/hadoop/:' $HADOOP_PREFIX/etc/hadoop/hadoop-env.sh
 
-RUN mkdir $HADOOP_PREFIX/input
-RUN cp $HADOOP_PREFIX/etc/hadoop/*.xml $HADOOP_PREFIX/input
+##RUN mkdir $HADOOP_PREFIX/input
+##RUN cp $HADOOP_PREFIX/etc/hadoop/*.xml $HADOOP_PREFIX/input
 
 # add config
-ADD conf/core-site.xml $HADOOP_PREFIX/etc/hadoop/core-site.xml
-ADD conf/hdfs-site.xml $HADOOP_PREFIX/etc/hadoop/hdfs-site.xml
-ADD conf/mapred-site.xml $HADOOP_PREFIX/etc/hadoop/mapred-site.xml
-ADD conf/yarn-site.xml $HADOOP_PREFIX/etc/hadoop/yarn-site.xml
+##ADD conf/core-site.xml $HADOOP_PREFIX/etc/hadoop/core-site.xml
+##ADD conf/hdfs-site.xml $HADOOP_PREFIX/etc/hadoop/hdfs-site.xml
+##ADD conf/mapred-site.xml $HADOOP_PREFIX/etc/hadoop/mapred-site.xml
+##ADD conf/yarn-site.xml $HADOOP_PREFIX/etc/hadoop/yarn-site.xml
+ADD conf /tmp/
 
 # format of hdfs
-RUN mkdir /data/
-RUN chmod 777 /data/
-RUN $HADOOP_PREFIX/bin/hdfs namenode -format
+##RUN mkdir /data/
+##RUN chmod 777 /data/
+##RUN $HADOOP_PREFIX/bin/hdfs namenode -format
 
-RUN ls -la /usr/local/hadoop/etc/hadoop/*-env.sh
-RUN chmod +x /usr/local/hadoop/etc/hadoop/*-env.sh
-RUN ls -la /usr/local/hadoop/etc/hadoop/*-env.sh
+#RUN ls -la /usr/local/hadoop/etc/hadoop/*-env.sh
+##RUN chmod +x /usr/local/hadoop/etc/hadoop/*-env.sh
+#RUN ls -la /usr/local/hadoop/etc/hadoop/*-env.sh
+###################
+
+RUN service sshd start
 
 # update buildstep
 COPY buildstep.sh /buildstep.sh
@@ -68,6 +73,15 @@ COPY bootstrap.sh /etc/bootstrap.sh
 RUN chown root.root /etc/bootstrap.sh
 RUN chmod 700 /etc/bootstrap.sh
 
+# update boot script
+COPY start.sh /etc/start.sh
+RUN chown root.root /etc/start.sh
+RUN chmod 700 /etc/start.sh
+
+COPY stop.sh /etc/stop.sh
+RUN chown root.root /etc/stop.sh
+RUN chmod 700 /etc/stop.sh
+
 # open port for hdfs
 EXPOSE 50010 50020 50070 50075 50090
 # open port for mapred
@@ -77,4 +91,5 @@ EXPOSE 8030 8031 8032 8033 8040 8042 8088
 # open port for spark
 EXPOSE 8080 7077 7072 8081 8082
 
-ENTRYPOINT ["/etc/bootstrap.sh"]
+#ENTRYPOINT ["/etc/bootstrap.sh"]
+#ENTRYPOINT ["/reposhare/scripts/spark_yarn/bootstrap.sh"]

@@ -22,39 +22,6 @@ fi
 # ----------------------------------------------------------------------
 # Setup spark & firefox
 # ----------------------------------------------------------------------
-# setup firefox
-/buildstep.sh log $BUILDSTEP_BAK "- $BUILDSTEP_BAK : setup firefox"
-FIREFOX_BIN=firefox-31.0.tar.bz2
-if [ ! -d /reposhare/$FIREFOX_BIN ]; then
-    tar xjf /reposhare/$FIREFOX_BIN -C /reposhare
-fi
-
-# setup spark
-mkdir -p $SPARK_SHARE
-IFS=' ' read -r -a SPARK_BIN_ARR <<< "$SPARK_VERSION"
-for i in "${SPARK_BIN_ARR[@]}"
-do
-    SPARK_VER=$i
-	HADOOP_PRO=${HADOOP_VERSION%.*}
-    SPARK_DAT=spark-$SPARK_VER-bin-hadoop$HADOOP_PRO
-    SPARK_BIN=$SPARK_DAT.tgz
-
-    # download
-    if [ ! -f /reposhare/$SPARK_BIN ]; then
-        /buildstep.sh log $BUILDSTEP_BAK "- $BUILDSTEP_BAK : Doesn't exist spark -> downloading : /reposhare/$SPARK_BIN"
-        tmp_path=/tmp/$BUILD_TYPE
-        mkdir -p $tmp_path
-        wget -P $tmp_path http://mirror.tcpdiag.net/apache/spark/spark-$SPARK_VER/$SPARK_BIN
-        mv $tmp_path/$SPARK_BIN /reposhare
-    fi
-
-    # setup
-    /buildstep.sh log $BUILDSTEP_BAK "- $BUILDSTEP_BAK : setup version $SPARK_VER";
-    if [ ! -d $SPARK_SHARE/$SPARK_DAT ]; then
-        tar xzf /reposhare/$SPARK_BIN -C $SPARK_SHARE
-    fi
-done
-
 export SPARK_MASTER_PORT=7077
 export SPARK_MASTER_WEBUI_PORT=7072
 export SPARK_WORKER_WEBUI_PORT=8082
@@ -75,9 +42,14 @@ mesos-slave --master=0.0.0.0:5050 --launcher=posix & > /dev/null
 # ----------------------------------------------------------------------
 # Run spark (start & stop)
 # ----------------------------------------------------------------------
-IFS=' ' read -r -a SPARK_VERSIONS <<< "$SPARK_VERSION"
-for i in "${SPARK_VERSIONS[@]}"
+#IFS=' ' read -r -a SPARK_VERSIONS <<< "$SPARK_VERSION"
+#for i in "${SPARK_VERSIONS[@]}"
+while true
 do
+    ##### Build Step 1
+    /buildstep.sh waitfor $BUILDSTEP_ZEP "- $BUILDSTEP_ZEP : started $BUILD_TYPE build"
+	`cat $HOME/current_spark`
+
     ##### set spark env
     SPARK_VER=$i
 	HADOOP_PRO=${HADOOP_VERSION%.*}

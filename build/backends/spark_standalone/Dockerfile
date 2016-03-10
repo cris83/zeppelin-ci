@@ -40,4 +40,5 @@ RUN chmod 700 /etc/bootstrap.sh
 # open port for spark
 EXPOSE 8080 7077 7072 8081 8082
 
-ENTRYPOINT ["/etc/bootstrap.sh"]
+#ENTRYPOINT ["/etc/bootstrap.sh"]
+ENTRYPOINT ["/reposhare/scripts/spark_standalone/bootstrap.sh"]

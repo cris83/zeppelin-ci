@@ -44,4 +44,5 @@ EXPOSE 8080 7077 7072 8081 8082
 # open port for mesos
 EXPOSE 5050
 
-ENTRYPOINT ["/etc/bootstrap.sh"]
+#ENTRYPOINT ["/etc/bootstrap.sh"]
+ENTRYPOINT ["/reposhare/scripts/spark_mesos/bootstrap.sh"]
