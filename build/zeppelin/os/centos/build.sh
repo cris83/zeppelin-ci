@@ -1,31 +1,38 @@
 #!/bin/bash
 set -e
-#echo "# Script version : 0.6"
-#echo "# ZCI-ENV File   : $ZCI_ENV"
-#source /reposhare/$ZCI_ENV
-
-#SPARK_SHARE=/reposhare/$BUILD_TYPE
-#USER_HOME=/reposhare/users/$CONT_NAME
-#ZEPPELIN_HOME=$USER_HOME/zeppelin
-
-
 # ----------------------------------------------------------------------
-# Init
+# Set Firefox
 # ----------------------------------------------------------------------
-ln -s /reposhare/firefox/firefox /usr/bin/firefox
+#ln -s /reposhare/firefox/firefox /usr/bin/firefox
+cp -rf /reposhare/firefox /
+ln -s /firefox/firefox /usr/bin/firefox
 
 
 # ----------------------------------------------------------------------
 # Open XVFB
 # ----------------------------------------------------------------------
 dbus-uuidgen > /var/lib/dbus/machine-id
-Xvfb $DISPLAY -ac -screen 0 1280x1024x24 &
+#Xvfb $DISPLAY -ac -screen 0 1280x1024x24 &
+Xvfb $DISPLAY -ac -screen 0 1280x1024x24 > /reposhare/${BUILD_TYPE}-xvfb.log 2>&1 &
 
 
 # ----------------------------------------------------------------------
 # Move to Zeppelin
 # ----------------------------------------------------------------------
 #cd $ZEPPELIN_HOME
+
+
+# ----------------------------------------------------------------------
+# Tail
+# ----------------------------------------------------------------------
+CMD=${1:-"exit 0"}
+if [[ "$CMD" == "-d" ]];
+then
+    service sshd stop
+    /usr/sbin/sshd -D -d
+else
+    /bin/bash -c "$*"
+fi
 
 
 # ----------------------------------------------------------------------
