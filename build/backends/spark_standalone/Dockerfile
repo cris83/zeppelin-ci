@@ -37,8 +37,17 @@ COPY bootstrap.sh /etc/bootstrap.sh
 RUN chown root.root /etc/bootstrap.sh
 RUN chmod 700 /etc/bootstrap.sh
 
+# update boot script
+COPY start.sh /etc/start.sh
+RUN chown root.root /etc/start.sh
+RUN chmod 700 /etc/start.sh
+
+COPY stop.sh /etc/stop.sh
+RUN chown root.root /etc/stop.sh
+RUN chmod 700 /etc/stop.sh
+
 # open port for spark
 EXPOSE 8080 7077 7072 8081 8082
 
 #ENTRYPOINT ["/etc/bootstrap.sh"]
-ENTRYPOINT ["/reposhare/scripts/spark_standalone/bootstrap.sh"]
+#ENTRYPOINT ["/reposhare/scripts/spark_standalone/bootstrap.sh"]

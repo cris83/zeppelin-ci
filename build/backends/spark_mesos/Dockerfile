@@ -24,6 +24,10 @@ RUN rm jdk-linux-x64.rpm
 ENV JAVA_HOME /usr/java/default
 ENV PATH $PATH:$JAVA_HOME/bin
 
+# install mesos
+RUN rpm -Uvh http://repos.mesosphere.com/el/6/noarch/RPMS/mesosphere-el-repo-6-2.noarch.rpm
+RUN yum -y install mesos
+
 # update buildstep
 COPY buildstep.sh /buildstep.sh
 RUN chown root.root /buildstep.sh
@@ -34,9 +38,14 @@ COPY bootstrap.sh /etc/bootstrap.sh
 RUN chown root.root /etc/bootstrap.sh
 RUN chmod 700 /etc/bootstrap.sh
 
-# install mesos
-RUN rpm -Uvh http://repos.mesosphere.com/el/6/noarch/RPMS/mesosphere-el-repo-6-2.noarch.rpm
-RUN yum -y install mesos
+# update boot script
+COPY start.sh /etc/start.sh
+RUN chown root.root /etc/start.sh
+RUN chmod 700 /etc/start.sh
+
+COPY stop.sh /etc/stop.sh
+RUN chown root.root /etc/stop.sh
+RUN chmod 700 /etc/stop.sh
 
 # open port for spark
 EXPOSE 8080 7077 7072 8081 8082
@@ -45,4 +54,4 @@ EXPOSE 8080 7077 7072 8081 8082
 EXPOSE 5050
 
 #ENTRYPOINT ["/etc/bootstrap.sh"]
-ENTRYPOINT ["/reposhare/scripts/spark_mesos/bootstrap.sh"]
+#ENTRYPOINT ["/reposhare/scripts/spark_mesos/bootstrap.sh"]

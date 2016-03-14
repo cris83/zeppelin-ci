@@ -68,7 +68,7 @@ run :
 		exit 1; \
 	fi; \
 	\
-	case $(type) in
+	case $(type) in \
 	    spark_standalone | \
 	    spark_yarn 		 | \
 	    spark_mesos 	 | \
@@ -80,10 +80,10 @@ run :
 			-e ZCI_ENV=$(ZCI_ENV) \
 			-e BUILD_TYPE=$(type) \
 			-e CONT_NAME=$(BACKEND_CONTAINER_NAME) \
+			--name zeppelin-$(BACKEND_CONTAINER_NAME) \
 			-p $(ZEPPELIN_PORT) \
 			-p $(ZEPPELIN_WEBSOCKET_PORT) \
 			--link $(BACKEND_CONTAINER_NAME):$(NICKNAME) \
-			--name zeppelin-$(BACKEND_CONTAINER_NAME) \
 			zeppelin-$(type):$(IMAGE_VERSION) /bin/bash; \
 		;; \
 		\
