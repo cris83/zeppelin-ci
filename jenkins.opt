@@ -1,2 +1,3 @@
 # added by cris
 JENKINS_JAVA_OPTIONS="-Djava.awt.headless=true -Xms512m -Xmx2048m -XX:MaxPermSize=512m"
+
