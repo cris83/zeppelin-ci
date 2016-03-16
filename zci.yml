@@ -72,7 +72,7 @@ failure:
 #     > id    : id is jenkins-job number
 #     > order : [all] or [none] or [order.id]
 #     > item  : image name
-#     > retry : Retry number of failed job of build step.
+#     > retry : Rebuild count of failed job on build step.
 #   
 # -------------------------------------------------------------------------
 jobs:
